@@ -26,11 +26,86 @@ ReviewTrust는 광고와 홍보성 리뷰로 인한 문제를 해결하기 위�
 - 구매 인증된 리뷰는 추가 가산점
 - 개인정보는 확인 후 자동 삭제
 
-### 3. 리워드 프로그램
-- 기본 리뷰 작성: 100P
-- 구매 인증: +50P
-- 이미지 첨부: +10P/장
-- 높은 신뢰도 달성: 추가 보너스
+### 3. 리워드 프로그램 🆕
+
+#### 재원 확보
+- 판매자로부터 수수료를 받아 리워드 풀(Pool) 확보
+- 투명한 블록체인 기반 리워드 관리
+
+#### 크레딧 획득 방식
+
+**기본 보상**
+- 기본 리뷰 작성: 100 크레딧
+- 구매 인증: +50 크레딧
+- 이미지 첨부: +10 크레딧/장 (최대 5장)
+- 가격 비례: 상품 가격의 0.5% 추가
+
+**신뢰도 배율 (등급성 보상)**
+- 90-100점: 1.5배
+- 70-89점: 1.3배
+- 50-69점: 1.1배
+- 0-49점: 1.0배
+
+**등급별 배율**
+- 브론즈 (0+ 크레딧): 1.0배
+- 실버 (1,000+ 크레딧): 1.2배
+- 골드 (5,000+ 크레딧): 1.5배
+- 플래티넘 (15,000+ 크레딧): 2.0배
+
+#### 계산 예시
+```
+상품 가격: 50,000원
+구매 인증: O
+이미지: 3장
+신뢰도: 92점
+등급: 골드
+
+기본 계산:
+- 기본: 100
+- 구매 인증: +50
+- 이미지: +30 (10×3)
+- 가격 비례: +250 (50,000×0.5%)
+- 소계: 430
+
+배율 적용:
+- 신뢰도 배율: ×1.5 (90점 이상)
+- 등급 배율: ×1.5 (골드)
+- 최종: 430 × 1.5 × 1.5 = 967 크레딧
+```
+
+#### 블록체인 기반 투명성
+- 모든 리워드 지급 과정이 블록체인에 기록
+- 리뷰 작성 → 평가 → 크레딧 산정 → 지급까지 투명하게 관리
+- 사용자가 직접 트랜잭션 확인 가능
+
+#### 등급별 혜택
+
+**브론즈 (0+ 크레딧)**
+- 기본 크레딧 지급
+- 리뷰 작성 시 100 크레딧
+- 커뮤니티 투표 참여
+
+**실버 (1,000+ 크레딧)**
+- 크레딧 20% 추가
+- 월별 보너스 50 크레딧
+- 우선 리뷰 노출
+- 실버 배지 획득
+
+**골드 (5,000+ 크레딧)**
+- 크레딧 50% 추가
+- 월별 보너스 150 크레딧
+- 프리미엄 리뷰 노출
+- 골드 배지 획득
+- 전용 고객 지원
+
+**플래티넘 (15,000+ 크레딧)**
+- 크레딧 100% 추가
+- 월별 보너스 300 크레딧
+- 최우선 리뷰 노출
+- 플래티넘 배지 획득
+- 전용 고객 지원
+- 신제품 우선 리뷰 기회
+- 특별 이벤트 초대
 
 ### 4. 커뮤니티 투표
 - 도움됨/도움안됨 투표 기능
@@ -54,17 +129,19 @@ src/
 │   ├── Home.tsx              # 홈 페이지
 │   ├── Reviews.tsx           # 리뷰 목록 페이지
 │   ├── ReviewDetail.tsx      # 리뷰 상세 페이지
-│   └── WriteReview.tsx       # 리뷰 작성 페이지
+│   ├── WriteReview.tsx       # 리뷰 작성 페이지
+│   └── Rewards.tsx           # 리워드 센터 페이지 🆕
 └── App.tsx                   # 메인 앱 컴포넌트
 ```
 
 ## 💻 기술 스택
 
-- **Frontend Framework**: React 18 with TypeScript
+- **Frontend Framework**: React 19 with TypeScript
 - **Styling**: styled-components
 - **Routing**: React Router v6
 - **State Management**: React Hooks (useState, useEffect)
 - **Build Tool**: Create React App
+- **Blockchain**: (향후 구현 예정)
 
 ## 🚀 시작하기
 
@@ -143,6 +220,42 @@ npm run build
 - 태그 추가
 - 예상 보상 포인트 확인
 
+### 5. Rewards (`/rewards`) 🆕
+
+#### 개요 탭
+- **크레딧 요약**
+  - 보유 크레딧
+  - 대기 중 크레딧 (검증 중)
+  - 누적 획득 크레딧
+  
+- **내 등급**
+  - 현재 등급 표시
+  - 다음 등급까지 진행률
+  - 등급별 혜택 안내
+
+- **리워드 획득 방법**
+  - 기본 보상 체계 설명
+  - 신뢰도 배율 안내
+  - 등급별 배율 안내
+
+- **블록체인 투명성**
+  - 블록체인 기반 관리 설명
+  - 트랜잭션 확인 기능
+
+#### 내역 탭
+- 크레딧 획득/사용 내역
+- 필터링 (전체/획득/사용)
+- 트랜잭션 상태 (완료/대기중)
+- 관련 리뷰 링크
+
+#### 계산기 탭
+- 예상 크레딧 계산
+- 상품 가격 입력
+- 이미지 개수 선택
+- 구매 인증 여부
+- 예상 신뢰도 점수
+- 상세 내역 표시
+
 ## 🎨 디자인 시스템
 
 ### 색상 팔레트
@@ -157,6 +270,12 @@ npm run build
 - 50-69점: 주황색 (보통)
 - 0-49점: 빨간색 (주의)
 
+### 등급별 색상
+- 브론즈: #CD7F32
+- 실버: #C0C0C0
+- 골드: #FFD700
+- 플래티넘: #E5E4E2
+
 ### 타이포그래피
 - Font Family: -apple-system, sans-serif
 - Font Sizes: 12px ~ 48px
@@ -167,43 +286,20 @@ npm run build
 - 구매 증빙 자료는 관리자 확인 후 자동 삭제
 - 개인정보 마스킹 처리 권장
 - 신고된 리뷰는 관리자 검토 후 조치
-
-## 📊 데이터 구조
-
-### Review 타입
-```typescript
-interface Review {
-  _id: string;
-  title: string;
-  content: string;
-  author: string;
-  category: string;
-  rating: number;
-  productName: string;
-  productBrand?: string;
-  imageUrl: string;
-  trustScore: number;
-  helpfulVotes: number;
-  notHelpfulVotes: number;
-  verifiedPurchase: boolean;
-  purchaseDate?: string;
-  usagePeriod?: string;
-  pros?: string[];
-  cons?: string[];
-  tags?: string[];
-  views: number;
-}
-```
+- 블록체인 기반 투명한 리워드 관리
 
 ## 🎯 향후 개선 사항
 
 ### 기능 추가
+- [x] 리워드 시스템 구현 🆕
 - [ ] 실시간 알림 시스템
 - [ ] 리뷰어 프로필 페이지
-- [ ] 포인트 사용처 확장
+- [ ] 포인트 사용처 확장 (기프트카드, 할인쿠폰 등)
 - [ ] 리뷰 댓글 기능
 - [ ] 제품 비교 기능
 - [ ] 리뷰 북마크
+- [ ] 월별/연간 리워드 통계
+- [ ] 리더보드 (최고 리뷰어 순위)
 
 ### 기술 개선
 - [ ] Redux/Zustand 상태 관리
@@ -212,36 +308,22 @@ interface Review {
 - [ ] PWA 지원
 - [ ] SEO 최적화
 - [ ] 접근성 개선
+- [ ] 블록체인 통합 (Ethereum, Polygon 등)
+- [ ] 스마트 컨트랙트 구현
 
 ### AI 기능
 - [ ] 광고성 리뷰 자동 감지
 - [ ] 리뷰 요약 생성
 - [ ] 감성 분석
 - [ ] 제품 추천 시스템
+- [ ] 신뢰도 예측 모델
 
-## 🤝 기여 가이드
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📄 라이센스
-
-MIT License
-
-## 👥 팀
-
-- 기획: [Your Name]
-- 디자인: [Your Name]
-- 개발: [Your Name]
-
-## 📞 문의
-
-- 이메일: contact@reviewtrust.com
-- 웹사이트: https://reviewtrust.com
-- GitHub: https://github.com/reviewtrust
+### 리워드 시스템 고도화
+- [ ] NFT 배지 시스템
+- [ ] 크레딧 거래소
+- [ ] 스테이킹 기능
+- [ ] DAO 거버넌스
+- [ ] 파트너사 연동 혜택
 
 ---
 

@@ -81,7 +81,27 @@ export interface RewardTransaction {
   points: number;
   reason: string;
   relatedReviewId?: string;
+  productName?: string;
   created_at: string;
+  status: 'pending' | 'completed';
+}
+
+export interface RewardTier {
+  name: string;
+  threshold: number; // 필요한 최소 크레딧
+  multiplier: number; // 크레딧 배율
+  color: string;
+  benefits: string[];
+}
+
+export interface RewardCalculation {
+  baseCredit: number;
+  verificationBonus: number;
+  imageBonus: number;
+  priceBonus: number;
+  ratingMultiplier: number;
+  tierMultiplier: number;
+  totalCredit: number;
 }
 
 export interface PaginationInfo {

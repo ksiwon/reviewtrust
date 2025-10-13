@@ -14,6 +14,7 @@ import Home from './pages/Home';
 import Reviews from './pages/Reviews';
 import ReviewDetail from './pages/ReviewDetail';
 import WriteReview from './pages/WriteReview';
+import Rewards from './pages/Rewards';
 
 // 임시 사용자 데이터 (실제로는 Context API나 Redux 사용)
 const mockUser = {
@@ -39,11 +40,11 @@ const App: React.FC = () => {
               <Route path="/reviews" element={<Reviews />} />
               <Route path="/review/:id" element={<ReviewDetail />} />
               <Route path="/write-review" element={<WriteReview />} />
+              <Route path="/rewards" element={<Rewards />} />
               
               {/* 추가 라우트 (필요시 구현) */}
               <Route path="/login" element={<ComingSoon title="로그인" />} />
               <Route path="/register" element={<ComingSoon title="회원가입" />} />
-              <Route path="/rewards" element={<ComingSoon title="리워드" />} />
               <Route path="/profile/:userId" element={<ComingSoon title="프로필" />} />
               <Route path="/how-it-works" element={<ComingSoon title="이용 방법" />} />
               <Route path="/terms" element={<ComingSoon title="이용약관" />} />

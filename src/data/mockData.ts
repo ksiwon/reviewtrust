@@ -1,6 +1,6 @@
 // src/data/mockData.ts
 
-import { Review, TopReviewer, Category } from '../types';
+import { Review, TopReviewer, Category, RewardTransaction, RewardTier } from '../types';
 
 export const categories: Category[] = [
   { value: '전자기기', label: '전자기기', icon: '💻' },
@@ -399,3 +399,168 @@ export const mockTopReviewers: TopReviewer[] = [
     profileImage: undefined
   }
 ];
+
+// 리워드 등급 정의
+export const rewardTiers: RewardTier[] = [
+  {
+    name: '브론즈',
+    threshold: 0,
+    multiplier: 1.0,
+    color: '#CD7F32',
+    benefits: [
+      '기본 크레딧 지급',
+      '리뷰 작성 시 100 크레딧',
+      '커뮤니티 투표 참여'
+    ]
+  },
+  {
+    name: '실버',
+    threshold: 1000,
+    multiplier: 1.2,
+    color: '#C0C0C0',
+    benefits: [
+      '크레딧 20% 추가',
+      '월별 보너스 50 크레딧',
+      '우선 리뷰 노출',
+      '실버 배지 획득'
+    ]
+  },
+  {
+    name: '골드',
+    threshold: 5000,
+    multiplier: 1.5,
+    color: '#FFD700',
+    benefits: [
+      '크레딧 50% 추가',
+      '월별 보너스 150 크레딧',
+      '프리미엄 리뷰 노출',
+      '골드 배지 획득',
+      '전용 고객 지원'
+    ]
+  },
+  {
+    name: '플래티넘',
+    threshold: 15000,
+    multiplier: 2.0,
+    color: '#E5E4E2',
+    benefits: [
+      '크레딧 100% 추가',
+      '월별 보너스 300 크레딧',
+      '최우선 리뷰 노출',
+      '플래티넘 배지 획득',
+      '전용 고객 지원',
+      '신제품 우선 리뷰 기회',
+      '특별 이벤트 초대'
+    ]
+  }
+];
+
+// 리워드 트랜잭션 목 데이터
+export const mockRewardTransactions: RewardTransaction[] = [
+  {
+    _id: 'rt1',
+    userId: 'user1',
+    type: 'earn',
+    points: 245,
+    reason: '리뷰 작성 보상 (신뢰도 95%)',
+    relatedReviewId: '1',
+    productName: 'MacBook Pro 14" M3',
+    created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    status: 'completed'
+  },
+  {
+    _id: 'rt2',
+    userId: 'user1',
+    type: 'earn',
+    points: 150,
+    reason: '월별 골드 등급 보너스',
+    created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    status: 'completed'
+  },
+  {
+    _id: 'rt3',
+    userId: 'user1',
+    type: 'earn',
+    points: 220,
+    reason: '리뷰 작성 보상 (신뢰도 92%)',
+    relatedReviewId: '8',
+    productName: 'iPad Pro 12.9" M2',
+    created_at: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
+    status: 'completed'
+  },
+  {
+    _id: 'rt4',
+    userId: 'user1',
+    type: 'earn',
+    points: 180,
+    reason: '고품질 리뷰 추가 보상',
+    relatedReviewId: '1',
+    created_at: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
+    status: 'completed'
+  },
+  {
+    _id: 'rt5',
+    userId: 'user1',
+    type: 'spend',
+    points: 5000,
+    reason: '기프트카드 교환',
+    created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+    status: 'completed'
+  },
+  {
+    _id: 'rt6',
+    userId: 'user1',
+    type: 'earn',
+    points: 450,
+    reason: '리뷰 작성 보상 (검증 중)',
+    relatedReviewId: '9',
+    productName: '삼성 갤럭시 버즈 프로',
+    created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    status: 'pending'
+  },
+  {
+    _id: 'rt7',
+    userId: 'user1',
+    type: 'earn',
+    points: 300,
+    reason: '베스트 리뷰어 이벤트 보상',
+    created_at: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(),
+    status: 'completed'
+  },
+  {
+    _id: 'rt8',
+    userId: 'user1',
+    type: 'earn',
+    points: 195,
+    reason: '리뷰 작성 보상 (신뢰도 88%)',
+    relatedReviewId: '3',
+    productName: '다이슨 V15 디텍트',
+    created_at: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+    status: 'completed'
+  }
+];
+
+// 리워드 계산 함수
+export const calculateRewardCredit = (
+  productPrice: number,
+  hasVerification: boolean,
+  imageCount: number,
+  reviewRating: number,
+  tierMultiplier: number
+): number => {
+  const baseCredit = 100;
+  const verificationBonus = hasVerification ? 50 : 0;
+  const imageBonus = imageCount * 10;
+  const priceBonus = Math.floor(productPrice * 0.005); // 0.5%
+  
+  // 신뢰도에 따른 배율
+  let ratingMultiplier = 1.0;
+  if (reviewRating >= 90) ratingMultiplier = 1.5;
+  else if (reviewRating >= 70) ratingMultiplier = 1.3;
+  else if (reviewRating >= 50) ratingMultiplier = 1.1;
+  
+  const totalBase = baseCredit + verificationBonus + imageBonus + priceBonus;
+  const total = Math.floor(totalBase * ratingMultiplier * tierMultiplier);
+  
+  return total;
+};
