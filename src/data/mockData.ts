@@ -53,7 +53,8 @@ export const mockReviews: Review[] = [
     cons: ['높은 가격', '부족한 포트 개수', '업그레이드 불가', '비싼 주변기기', '무거운 무게'],
     tags: ['개발', '프로그래밍', 'M3칩', '맥북', '노트북'],
     isSponsored: false,
-    views: 2341
+    views: 2341,
+    sourcePlatform: 'ReviewTrust' // 자체 플랫폼 작성 리뷰
   },
   {
     _id: '2',
@@ -92,7 +93,9 @@ export const mockReviews: Review[] = [
     cons: ['높은 초기 비용', '설치 공간 필요', '무게가 무거움'],
     tags: ['가전', '건조기', '4인가족', 'LG', '세탁'],
     isSponsored: false,
-    views: 3456
+    views: 3456,
+    sourcePlatform: 'Coupang', // 외부 소스 예시
+    originalUrl: 'https://coupang.com/vp/products/...'
   },
   {
     _id: '3',
@@ -133,7 +136,9 @@ export const mockReviews: Review[] = [
     cons: ['무거움', '짧은 배터리', '비싼 소모품', '높은 가격', '시끄러운 소음'],
     tags: ['청소기', '무선청소기', '다이슨', '가전'],
     isSponsored: false,
-    views: 1892
+    views: 1892,
+    sourcePlatform: 'Naver', // 외부 소스 예시
+    originalUrl: 'https://shopping.naver.com/...'
   },
   {
     _id: '4',
@@ -174,7 +179,8 @@ export const mockReviews: Review[] = [
     cons: ['높은 가격', '분실 우려', '안드로이드 호환성', '비싼 교체 비용'],
     tags: ['이어폰', '무선이어폰', '에어팟', '애플', '노이즈캔슬링'],
     isSponsored: false,
-    views: 2567
+    views: 2567,
+    sourcePlatform: 'ReviewTrust'
   },
   {
     _id: '5',
@@ -217,7 +223,8 @@ Windows 11이 생각보다 괜찮습니다. 특히 삼성 갤럭시 폰과 연�
     cons: ['발열', '배터리 수명', '높은 가격', '팬 소음', '터치패드 크기'],
     tags: ['노트북', '삼성', '갤럭시북', 'Windows', 'AMOLED'],
     isSponsored: false,
-    views: 1745
+    views: 1745,
+    sourcePlatform: '11st'
   },
   {
     _id: '6',
@@ -258,7 +265,8 @@ Windows 11이 생각보다 괜찮습니다. 특히 삼성 갤럭시 폰과 연�
     cons: ['코스트코 회원만', '보관 필요', '양 조절 어려움'],
     tags: ['견과류', '코스트코', '건강식품', '아몬드', '캐슈넛'],
     isSponsored: false,
-    views: 4123
+    views: 4123,
+    sourcePlatform: 'ReviewTrust'
   },
   {
     _id: '7',
@@ -299,7 +307,8 @@ Windows 11이 생각보다 괜찮습니다. 특히 삼성 갤럭시 폰과 연�
     cons: ['무거움', '작은 사이즈', '높은 가격', '속도 낼 때 부담'],
     tags: ['러닝화', '운동화', '나이키', '에어맥스', '러닝'],
     isSponsored: false,
-    views: 1534
+    views: 1534,
+    sourcePlatform: 'ReviewTrust'
   },
   {
     _id: '8',
@@ -338,7 +347,8 @@ M2 칩 성능이 강력합니다. 4K 영상 편집도 부드럽게 처리되고,
     cons: ['iPadOS 한계', '비싼 액세서리', '높은 가격', '파일 관리'],
     tags: ['아이패드', '태블릿', '애플', 'M2', '프로'],
     isSponsored: false,
-    views: 2891
+    views: 2891,
+    sourcePlatform: 'ReviewTrust'
   }
 ];
 
@@ -400,7 +410,6 @@ export const mockTopReviewers: TopReviewer[] = [
   }
 ];
 
-// 리워드 등급 정의
 export const rewardTiers: RewardTier[] = [
   {
     name: '브론즈',
@@ -455,7 +464,6 @@ export const rewardTiers: RewardTier[] = [
   }
 ];
 
-// 리워드 트랜잭션 목 데이터
 export const mockRewardTransactions: RewardTransaction[] = [
   {
     _id: 'rt1',
@@ -540,20 +548,20 @@ export const mockRewardTransactions: RewardTransaction[] = [
   }
 ];
 
-// 리워드 계산 함수
+// 리워드 계산 함수 (발표자료 공식 반영)
 export const calculateRewardCredit = (
   productPrice: number,
   hasVerification: boolean,
   imageCount: number,
-  reviewRating: number,
+  reviewRating: number, // 신뢰도 점수 (0-100)
   tierMultiplier: number
 ): number => {
   const baseCredit = 100;
   const verificationBonus = hasVerification ? 50 : 0;
-  const imageBonus = imageCount * 10;
+  const imageBonus = Math.min(imageCount, 5) * 10; // 장당 10P, 최대 5장
   const priceBonus = Math.floor(productPrice * 0.005); // 0.5%
   
-  // 신뢰도에 따른 배율
+  // 신뢰도 배율 적용
   let ratingMultiplier = 1.0;
   if (reviewRating >= 90) ratingMultiplier = 1.5;
   else if (reviewRating >= 70) ratingMultiplier = 1.3;

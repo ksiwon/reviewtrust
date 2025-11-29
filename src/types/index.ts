@@ -19,12 +19,14 @@ export interface Review {
   notHelpfulVotes: number;
   verifiedPurchase: boolean;
   purchaseDate?: string;
-  usagePeriod?: string; // 예: "3개월", "1년"
+  usagePeriod?: string;
   pros?: string[];
   cons?: string[];
   tags?: string[];
-  isSponsored: boolean; // 협찬 여부
+  isSponsored: boolean;
   views: number;
+  sourcePlatform?: 'ReviewTrust' | 'Naver' | 'Coupang' | '11st'; 
+  originalUrl?: string; 
 }
 
 export interface TopReviewer {
@@ -88,8 +90,8 @@ export interface RewardTransaction {
 
 export interface RewardTier {
   name: string;
-  threshold: number; // 필요한 최소 크레딧
-  multiplier: number; // 크레딧 배율
+  threshold: number;
+  multiplier: number;
   color: string;
   benefits: string[];
 }

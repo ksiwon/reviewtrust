@@ -1,10 +1,10 @@
 // src/pages/Home.tsx
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Review, TopReviewer } from '../types';
-import { mockReviews, mockTopReviewers, categories } from '../data/mockData';
+import { reviewService } from '../api/reviewService';
+import { mockTopReviewers, categories } from '../data/mockData';
 import { theme, Container, Section, SectionTitle, Grid } from '../styles/GlobalStyle';
 
 const Home: React.FC = () => {
@@ -15,13 +15,16 @@ const Home: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
-      
-      // 실제로는 API 호출
-      setTimeout(() => {
-        setFeaturedReviews(mockReviews.slice(0, 4));
+      try {
+        const reviewsData = await reviewService.getReviews({ sortBy: 'trustScore' });
+        setFeaturedReviews(reviewsData.slice(0, 4));
+        // API 호출 시뮬레이션 (실제로는 서버에서 가져옴)
         setTopReviewers(mockTopReviewers.slice(0, 3));
+      } catch (e) {
+        console.error(e);
+      } finally {
         setIsLoading(false);
-      }, 500);
+      }
     };
 
     fetchData();
@@ -34,39 +37,33 @@ const Home: React.FC = () => {
     return theme.colors.trust.poor;
   };
 
-  const getTrustBadgeText = (score: number): string => {
-    if (score >= 90) return '매우 신뢰';
-    if (score >= 70) return '신뢰';
-    if (score >= 50) return '보통';
-    return '주의';
-  };
-
   return (
     <HomeContainer>
       {/* 히어로 섹션 */}
       <HeroSection>
         <Container>
           <HeroContent>
-            <HeroTitle>신뢰할 수 있는 리얼 리뷰</HeroTitle>
+            <HeroTitle>광고 없는 순수 리뷰 플랫폼</HeroTitle>
             <HeroSubtitle>
-              광고 없는 순수한 경험담으로 현명한 선택을 도와드립니다
+              네이버, 쿠팡의 리뷰를 한 곳에서.<br/>
+              AI와 집단지성으로 검증된 신뢰도 점수를 확인하세요.
             </HeroSubtitle>
             
             <FeatureGrid>
               <FeatureCard>
-                <FeatureIcon>✅</FeatureIcon>
-                <FeatureTitle>구매 인증</FeatureTitle>
-                <FeatureDesc>실제 구매자만 리뷰 작성</FeatureDesc>
+                <FeatureIcon>🔍</FeatureIcon>
+                <FeatureTitle>데이터 통합</FeatureTitle>
+                <FeatureDesc>여러 쇼핑몰 리뷰를 모아서 분석</FeatureDesc>
               </FeatureCard>
               <FeatureCard>
                 <FeatureIcon>⭐</FeatureIcon>
                 <FeatureTitle>신뢰도 점수</FeatureTitle>
-                <FeatureDesc>커뮤니티가 검증한 리뷰</FeatureDesc>
+                <FeatureDesc>구매인증 및 커뮤니티 검증</FeatureDesc>
               </FeatureCard>
               <FeatureCard>
-                <FeatureIcon>🎁</FeatureIcon>
-                <FeatureTitle>리뷰 보상</FeatureTitle>
-                <FeatureDesc>성실한 리뷰에 포인트 지급</FeatureDesc>
+                <FeatureIcon>💰</FeatureIcon>
+                <FeatureTitle>공정 보상</FeatureTitle>
+                <FeatureDesc>양질의 리뷰에 크레딧 지급</FeatureDesc>
               </FeatureCard>
             </FeatureGrid>
           </HeroContent>
@@ -90,12 +87,12 @@ const Home: React.FC = () => {
         {/* 추천 리뷰 섹션 */}
         <Section>
           <SectionHeader>
-            <SectionTitle>신뢰도 높은 리뷰</SectionTitle>
+            <SectionTitle>🔥 지금 뜨는 고신뢰 리뷰</SectionTitle>
             <ViewAllLink to="/reviews">전체보기</ViewAllLink>
           </SectionHeader>
           
           {isLoading ? (
-            <LoadingMessage>리뷰를 불러오는 중입니다...</LoadingMessage>
+            <LoadingMessage>데이터를 분석 중입니다...</LoadingMessage>
           ) : (
             <ReviewGrid>
               {featuredReviews.map(review => (
@@ -106,45 +103,23 @@ const Home: React.FC = () => {
                       <VerifiedBadge>✓ 구매인증</VerifiedBadge>
                     )}
                     <TrustScoreBadge color={getTrustBadgeColor(review.trustScore)}>
-                      {getTrustBadgeText(review.trustScore)} {review.trustScore}%
+                      신뢰도 {review.trustScore}%
                     </TrustScoreBadge>
+                    {/* 외부 소스 표시 */}
+                    {review.sourcePlatform && review.sourcePlatform !== 'ReviewTrust' && (
+                        <SourceBadge>{review.sourcePlatform}</SourceBadge>
+                    )}
                   </ReviewImageWrapper>
                   
                   <ReviewContent>
                     <ProductInfo>
-                      <ProductBrand>{review.productBrand}</ProductBrand>
                       <ProductName>{review.productName}</ProductName>
                     </ProductInfo>
-                    
                     <ReviewTitle>{review.title}</ReviewTitle>
-                    
                     <RatingRow>
-                      <Stars>
-                        {'★'.repeat(Math.floor(review.rating))}
-                        {review.rating % 1 !== 0 && '½'}
-                        {'☆'.repeat(5 - Math.ceil(review.rating))}
-                      </Stars>
-                      <RatingText>{review.rating.toFixed(1)}</RatingText>
+                      {/* 'Stars' is not defined 오류 수정: 아래 스타일 정의 추가됨 */}
+                      <Stars>★ {review.rating.toFixed(1)}</Stars>
                     </RatingRow>
-                    
-                    <ReviewMeta>
-                      <MetaItem>
-                        <MetaIcon>👤</MetaIcon>
-                        <MetaText>{review.author}</MetaText>
-                      </MetaItem>
-                      <MetaItem>
-                        <MetaIcon>👍</MetaIcon>
-                        <MetaText>{review.helpfulVotes}</MetaText>
-                      </MetaItem>
-                      <MetaItem>
-                        <MetaIcon>👁</MetaIcon>
-                        <MetaText>{review.views}</MetaText>
-                      </MetaItem>
-                    </ReviewMeta>
-                    
-                    {review.usagePeriod && (
-                      <UsagePeriod>사용기간: {review.usagePeriod}</UsagePeriod>
-                    )}
                   </ReviewContent>
                 </ReviewCard>
               ))}
@@ -152,588 +127,135 @@ const Home: React.FC = () => {
           )}
         </Section>
 
-        {/* 신뢰받는 리뷰어 섹션 */}
+        {/* [추가] 베스트 리뷰어 섹션 (topReviewers 사용) */}
         <Section>
-          <SectionTitle>이달의 신뢰받는 리뷰어 🏆</SectionTitle>
+          <SectionTitle>🏆 이달의 베스트 리뷰어</SectionTitle>
           <ReviewerGrid>
             {topReviewers.map((reviewer, index) => (
               <ReviewerCard key={reviewer._id}>
-                <ReviewerRank rank={index + 1}>#{index + 1}</ReviewerRank>
-                <ReviewerAvatar>
-                  {reviewer.nickname.charAt(0)}
-                </ReviewerAvatar>
-                <ReviewerName>{reviewer.nickname}</ReviewerName>
-                
-                <ReviewerStats>
-                  <StatItem>
-                    <StatLabel>신뢰도</StatLabel>
-                    <StatValue color={getTrustBadgeColor(reviewer.trustScore)}>
-                      {reviewer.trustScore}%
-                    </StatValue>
-                  </StatItem>
-                  <StatItem>
-                    <StatLabel>리뷰수</StatLabel>
-                    <StatValue>{reviewer.reviewCount}개</StatValue>
-                  </StatItem>
-                  <StatItem>
-                    <StatLabel>획득 보상</StatLabel>
-                    <StatValue>{reviewer.rewardPoints.toLocaleString()}P</StatValue>
-                  </StatItem>
-                </ReviewerStats>
-                
-                {reviewer.badges && reviewer.badges.length > 0 && (
-                  <BadgeContainer>
-                    {reviewer.badges.slice(0, 2).map((badge, i) => (
-                      <SmallBadge key={i}>🏅 {badge}</SmallBadge>
-                    ))}
-                  </BadgeContainer>
-                )}
+                <ReviewerRank>#{index + 1}</ReviewerRank>
+                <ReviewerInfo>
+                  <ReviewerName>{reviewer.nickname}</ReviewerName>
+                  <ReviewerStats>
+                    <span>신뢰도 {reviewer.trustScore}%</span>
+                    <span>•</span>
+                    <span>리뷰 {reviewer.reviewCount}개</span>
+                  </ReviewerStats>
+                </ReviewerInfo>
+                <ReviewerPoints>{reviewer.rewardPoints.toLocaleString()} P</ReviewerPoints>
               </ReviewerCard>
             ))}
           </ReviewerGrid>
         </Section>
-      </Container>
 
-      {/* 플랫폼 소개 섹션 */}
-      <InfoSection>
-        <Container>
-          <InfoTitle>왜 저희 플랫폼을 선택해야 하나요?</InfoTitle>
-          <InfoGrid>
-            <InfoCard>
-              <InfoCardIcon>🔍</InfoCardIcon>
-              <InfoCardTitle>투명한 검증 시스템</InfoCardTitle>
-              <InfoCardText>
-                모든 리뷰는 구매 인증을 거치며, 커뮤니티 투표로 신뢰도가 결정됩니다.
-                광고성 리뷰는 자동으로 낮은 평가를 받아 노출이 제한됩니다.
-              </InfoCardText>
-            </InfoCard>
-            <InfoCard>
-              <InfoCardIcon>💰</InfoCardIcon>
-              <InfoCardTitle>공정한 보상 시스템</InfoCardTitle>
-              <InfoCardText>
-                높은 신뢰도를 받은 리뷰는 자동으로 포인트 보상을 받습니다.
-                성실한 리뷰어일수록 더 많은 보상을 획득할 수 있습니다.
-              </InfoCardText>
-            </InfoCard>
-            <InfoCard>
-              <InfoCardIcon>🚫</InfoCardIcon>
-              <InfoCardTitle>광고 제로 정책</InfoCardTitle>
-              <InfoCardText>
-                협찬, 홍보성 리뷰는 커뮤니티 투표로 자동 필터링됩니다.
-                순수한 경험담만 높은 신뢰도를 받을 수 있습니다.
-              </InfoCardText>
-            </InfoCard>
-          </InfoGrid>
-          
-          <CTASection>
-            <CTATitle>지금 바로 시작하세요!</CTATitle>
-            <CTAButtons>
-              <CTAButton to="/register" primary>회원가입</CTAButton>
-              <CTAButton to="/reviews">리뷰 둘러보기</CTAButton>
-            </CTAButtons>
-          </CTASection>
-        </Container>
-      </InfoSection>
+        {/* B2B 판매자 섹션 */}
+        <SellerSection>
+            <SellerContent>
+                <SellerTitle>판매자이신가요? 악성 리뷰를 관리하세요.</SellerTitle>
+                <SellerDesc>
+                    리뷰 신뢰도 분석 AI를 통해 경쟁사 공격 및 어뷰징을 탐지합니다.<br/>
+                    B2B SaaS 구독으로 CS 효율을 3배 높이세요.
+                </SellerDesc>
+                <SellerButton to="/contact">무료 체험 시작하기</SellerButton>
+            </SellerContent>
+        </SellerSection>
+
+      </Container>
     </HomeContainer>
   );
 };
 
 export default Home;
 
-// 스타일 컴포넌트
-const HomeContainer = styled.div`
-  width: 100%;
-  min-height: 100vh;
-`;
-
+// Styled Components
+const HomeContainer = styled.div`width: 100%; min-height: 100vh;`;
 const HeroSection = styled.section`
   background: linear-gradient(135deg, ${theme.colors.primary} 0%, ${theme.colors.primaryDark} 100%);
-  padding: 80px 0;
-  margin-bottom: 60px;
+  padding: 80px 0; margin-bottom: 60px;
 `;
-
-const HeroContent = styled.div`
-  text-align: center;
-`;
-
+const HeroContent = styled.div`text-align: center;`;
 const HeroTitle = styled.h1`
-  font-size: ${theme.typography.fontSize['5xl']};
-  font-weight: ${theme.typography.fontWeight.bold};
-  color: ${theme.colors.white};
-  margin-bottom: ${theme.spacing.md};
-  
-  @media (max-width: 768px) {
-    font-size: ${theme.typography.fontSize['3xl']};
-  }
+  font-size: ${theme.typography.fontSize['5xl']}; font-weight: bold; color: ${theme.colors.white}; margin-bottom: 20px;
+  @media (max-width: 768px) { font-size: 32px; }
 `;
-
-const HeroSubtitle = styled.p`
-  font-size: ${theme.typography.fontSize.xl};
-  font-weight: ${theme.typography.fontWeight.normal};
-  color: rgba(255, 255, 255, 0.9);
-  margin-bottom: ${theme.spacing['2xl']};
-  
-  @media (max-width: 768px) {
-    font-size: ${theme.typography.fontSize.lg};
-  }
-`;
-
-const FeatureGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: ${theme.spacing.lg};
-  
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
+const HeroSubtitle = styled.p`font-size: 20px; color: rgba(255,255,255,0.9); margin-bottom: 40px; line-height: 1.5;`;
+const FeatureGrid = styled.div`display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; @media (max-width: 768px) { grid-template-columns: 1fr; }`;
 const FeatureCard = styled.div`
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-radius: ${theme.borderRadius.lg};
-  padding: ${theme.spacing.xl};
-  text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.3s ease;
-  
-  &:hover {
-    background: rgba(255, 255, 255, 0.15);
-    transform: translateY(-4px);
-  }
+  background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 12px; padding: 32px;
+  text-align: center; border: 1px solid rgba(255,255,255,0.2); transition: transform 0.2s;
+  &:hover { transform: translateY(-5px); }
 `;
+const FeatureIcon = styled.div`font-size: 48px; margin-bottom: 16px;`;
+const FeatureTitle = styled.h3`font-size: 24px; font-weight: 600; color: white; margin-bottom: 8px;`;
+const FeatureDesc = styled.p`color: rgba(255,255,255,0.8);`;
 
-const FeatureIcon = styled.div`
-  font-size: ${theme.typography.fontSize['5xl']};
-  margin-bottom: ${theme.spacing.md};
-`;
+const SectionHeader = styled.div`display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;`;
+const ViewAllLink = styled(Link)`color: ${theme.colors.primary}; font-weight: 600; text-decoration: none;`;
 
-const FeatureTitle = styled.h3`
-  font-size: ${theme.typography.fontSize.xl};
-  font-weight: ${theme.typography.fontWeight.semibold};
-  color: ${theme.colors.white};
-  margin-bottom: ${theme.spacing.sm};
-`;
-
-const FeatureDesc = styled.p`
-  font-size: ${theme.typography.fontSize.base};
-  color: rgba(255, 255, 255, 0.8);
-`;
-
-const SectionHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: ${theme.spacing.lg};
-`;
-
-const ViewAllLink = styled(Link)`
-  font-size: ${theme.typography.fontSize.lg};
-  font-weight: ${theme.typography.fontWeight.medium};
-  color: ${theme.colors.primary};
-  text-decoration: none;
-  transition: color 0.2s ease;
-  
-  &:hover {
-    color: ${theme.colors.primaryDark};
-    text-decoration: underline;
-  }
-`;
-
-const CategoryGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: ${theme.spacing.md};
-  
-  @media (max-width: 768px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-`;
-
+const CategoryGrid = styled.div`display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; @media (max-width: 768px) { grid-template-columns: repeat(2, 1fr); }`;
 const CategoryItem = styled(Link)`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: ${theme.colors.background.secondary};
-  border-radius: ${theme.borderRadius.lg};
-  padding: ${theme.spacing.lg};
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-decoration: none;
-  border: 2px solid transparent;
-  
-  &:hover {
-    background-color: ${theme.colors.purple[100]};
-    border-color: ${theme.colors.primary};
-    transform: translateY(-4px);
-  }
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: ${theme.colors.background.secondary}; border-radius: 12px; padding: 24px;
+  text-decoration: none; transition: all 0.2s;
+  &:hover { background: ${theme.colors.purple[100]}; transform: translateY(-3px); }
 `;
+const CategoryEmoji = styled.div`font-size: 40px; margin-bottom: 10px;`;
+const CategoryName = styled.span`color: ${theme.colors.gray[800]}; font-weight: 500;`;
 
-const CategoryEmoji = styled.div`
-  font-size: ${theme.typography.fontSize['5xl']};
-  margin-bottom: ${theme.spacing.sm};
-`;
-
-const CategoryName = styled.span`
-  font-size: ${theme.typography.fontSize.base};
-  font-weight: ${theme.typography.fontWeight.medium};
-  color: ${theme.colors.gray[800]};
-`;
-
-const ReviewGrid = styled(Grid)`
-  grid-template-columns: repeat(2, 1fr);
-  
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
+const ReviewGrid = styled(Grid)`grid-template-columns: repeat(2, 1fr); @media (max-width: 768px) { grid-template-columns: 1fr; }`;
 const ReviewCard = styled(Link)`
-  background-color: ${theme.colors.white};
-  border-radius: ${theme.borderRadius.lg};
-  overflow: hidden;
-  box-shadow: ${theme.shadows.base};
-  transition: all 0.2s ease;
-  text-decoration: none;
-  color: ${theme.colors.gray[800]};
-  
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: ${theme.shadows.lg};
-  }
+  background: white; border-radius: 12px; overflow: hidden; box-shadow: ${theme.shadows.base};
+  text-decoration: none; color: inherit; transition: all 0.2s;
+  &:hover { transform: translateY(-5px); box-shadow: ${theme.shadows.lg}; }
 `;
-
-const ReviewImageWrapper = styled.div`
-  position: relative;
-  width: 100%;
-  height: 200px;
-  overflow: hidden;
-`;
-
-const ReviewImage = styled.img`
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-`;
-
+const ReviewImageWrapper = styled.div`position: relative; height: 200px; overflow: hidden;`;
+const ReviewImage = styled.img`width: 100%; height: 100%; object-fit: cover;`;
 const VerifiedBadge = styled.div`
-  position: absolute;
-  top: ${theme.spacing.sm};
-  left: ${theme.spacing.sm};
-  background-color: ${theme.colors.success};
-  color: ${theme.colors.white};
-  font-size: ${theme.typography.fontSize.xs};
-  font-weight: ${theme.typography.fontWeight.semibold};
-  padding: ${theme.spacing.sm} ${theme.spacing.md};
-  border-radius: ${theme.borderRadius.full};
-  box-shadow: ${theme.shadows.md};
+  position: absolute; top: 10px; left: 10px; background: ${theme.colors.success}; color: white;
+  padding: 4px 8px; border-radius: 20px; font-size: 12px; font-weight: bold;
 `;
-
 const TrustScoreBadge = styled.div<{ color: string }>`
-  position: absolute;
-  top: ${theme.spacing.sm};
-  right: ${theme.spacing.sm};
-  background-color: ${props => props.color};
-  color: ${theme.colors.white};
-  font-size: ${theme.typography.fontSize.xs};
-  font-weight: ${theme.typography.fontWeight.semibold};
-  padding: ${theme.spacing.sm} ${theme.spacing.md};
-  border-radius: ${theme.borderRadius.full};
-  box-shadow: ${theme.shadows.md};
+  position: absolute; top: 10px; right: 10px; background: ${props => props.color}; color: white;
+  padding: 4px 8px; border-radius: 20px; font-size: 12px; font-weight: bold;
 `;
-
-const ReviewContent = styled.div`
-  padding: ${theme.spacing.lg};
+const SourceBadge = styled.div`
+    position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white;
+    padding: 4px 8px; border-radius: 4px; font-size: 11px;
 `;
+const ReviewContent = styled.div`padding: 20px;`;
+const ProductInfo = styled.div`margin-bottom: 8px;`;
+const ProductName = styled.div`font-weight: 600; color: ${theme.colors.gray[700]};`;
+const ReviewTitle = styled.h3`font-size: 18px; font-weight: bold; margin-bottom: 10px; line-height: 1.4;`;
+const RatingRow = styled.div`color: ${theme.colors.warning}; font-weight: bold;`;
+const Stars = styled.div`color: ${theme.colors.warning}; font-size: 16px; font-weight: bold;`; // 추가된 스타일
 
-const ProductInfo = styled.div`
-  margin-bottom: ${theme.spacing.sm};
-`;
+const LoadingMessage = styled.div`text-align: center; padding: 40px; color: ${theme.colors.gray[500]};`;
 
-const ProductBrand = styled.div`
-  font-size: ${theme.typography.fontSize.sm};
-  font-weight: ${theme.typography.fontWeight.medium};
-  color: ${theme.colors.gray[500]};
-`;
-
-const ProductName = styled.div`
-  font-size: ${theme.typography.fontSize.base};
-  font-weight: ${theme.typography.fontWeight.semibold};
-  color: ${theme.colors.gray[700]};
-`;
-
-const ReviewTitle = styled.h3`
-  font-size: ${theme.typography.fontSize.lg};
-  font-weight: ${theme.typography.fontWeight.semibold};
-  margin-bottom: ${theme.spacing.md};
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  line-height: 1.4;
-`;
-
-const RatingRow = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${theme.spacing.sm};
-  margin-bottom: ${theme.spacing.md};
-`;
-
-const Stars = styled.div`
-  font-size: ${theme.typography.fontSize.lg};
-  color: ${theme.colors.warning};
-`;
-
-const RatingText = styled.span`
-  font-size: ${theme.typography.fontSize.base};
-  font-weight: ${theme.typography.fontWeight.semibold};
-  color: ${theme.colors.gray[800]};
-`;
-
-const ReviewMeta = styled.div`
-  display: flex;
-  gap: ${theme.spacing.md};
-  flex-wrap: wrap;
-`;
-
-const MetaItem = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${theme.spacing.xs};
-`;
-
-const MetaIcon = styled.span`
-  font-size: ${theme.typography.fontSize.base};
-`;
-
-const MetaText = styled.span`
-  font-size: ${theme.typography.fontSize.sm};
-  color: ${theme.colors.gray[600]};
-`;
-
-const UsagePeriod = styled.div`
-  margin-top: ${theme.spacing.sm};
-  font-size: ${theme.typography.fontSize.sm};
-  color: ${theme.colors.gray[500]};
-  font-style: italic;
-`;
-
-const ReviewerGrid = styled(Grid)`
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
+// Reviewer Section Styles
+const ReviewerGrid = styled.div`display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; @media (max-width: 768px) { grid-template-columns: 1fr; }`;
 const ReviewerCard = styled.div`
-  background: ${theme.colors.white};
-  border-radius: ${theme.borderRadius.lg};
-  padding: ${theme.spacing.xl};
-  box-shadow: ${theme.shadows.base};
-  text-align: center;
-  position: relative;
-  transition: all 0.2s ease;
-  
-  &:hover {
-    box-shadow: ${theme.shadows.lg};
-    transform: translateY(-4px);
-  }
+  background: white; padding: 20px; border-radius: 12px; box-shadow: ${theme.shadows.sm};
+  display: flex; align-items: center; gap: 16px; position: relative;
 `;
-
-const ReviewerRank = styled.div<{ rank: number }>`
-  position: absolute;
-  top: ${theme.spacing.md};
-  right: ${theme.spacing.md};
-  background: ${props => {
-    if (props.rank === 1) return 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)';
-    if (props.rank === 2) return 'linear-gradient(135deg, #C0C0C0 0%, #808080 100%)';
-    if (props.rank === 3) return 'linear-gradient(135deg, #CD7F32 0%, #8B4513 100%)';
-    return theme.colors.gray[400];
-  }};
-  color: ${theme.colors.white};
-  font-size: ${theme.typography.fontSize.base};
-  font-weight: ${theme.typography.fontWeight.bold};
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: ${theme.shadows.md};
+const ReviewerRank = styled.div`
+  position: absolute; top: 10px; left: 10px; font-size: 12px; font-weight: bold; 
+  color: ${theme.colors.primary}; background: ${theme.colors.purple[50]}; padding: 2px 8px; border-radius: 10px;
 `;
+const ReviewerInfo = styled.div`flex: 1; margin-left: 10px;`;
+const ReviewerName = styled.div`font-weight: bold; margin-bottom: 4px;`;
+const ReviewerStats = styled.div`font-size: 12px; color: ${theme.colors.gray[500]};`;
+const ReviewerPoints = styled.div`font-weight: bold; color: ${theme.colors.warning};`;
 
-const ReviewerAvatar = styled.div`
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, ${theme.colors.primary} 0%, ${theme.colors.primaryDark} 100%);
-  color: ${theme.colors.white};
-  font-size: ${theme.typography.fontSize['3xl']};
-  font-weight: ${theme.typography.fontWeight.bold};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto ${theme.spacing.md};
-  box-shadow: ${theme.shadows.lg};
+// B2B Section Styles
+const SellerSection = styled.section`
+    background-color: ${theme.colors.gray[900]}; border-radius: 16px; padding: 60px; text-align: center;
+    margin: 60px 0; color: white;
 `;
-
-const ReviewerName = styled.h3`
-  font-size: ${theme.typography.fontSize.xl};
-  font-weight: ${theme.typography.fontWeight.semibold};
-  margin-bottom: ${theme.spacing.md};
-  color: ${theme.colors.gray[800]};
-`;
-
-const ReviewerStats = styled.div`
-  display: flex;
-  justify-content: space-around;
-  margin-bottom: ${theme.spacing.md};
-`;
-
-const StatItem = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${theme.spacing.xs};
-`;
-
-const StatLabel = styled.span`
-  font-size: ${theme.typography.fontSize.sm};
-  color: ${theme.colors.gray[600]};
-`;
-
-const StatValue = styled.span<{ color?: string }>`
-  font-size: ${theme.typography.fontSize.lg};
-  font-weight: ${theme.typography.fontWeight.bold};
-  color: ${props => props.color || theme.colors.gray[800]};
-`;
-
-const BadgeContainer = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: ${theme.spacing.xs};
-  justify-content: center;
-`;
-
-const SmallBadge = styled.span`
-  font-size: ${theme.typography.fontSize.xs};
-  background-color: ${theme.colors.purple[100]};
-  color: ${theme.colors.primary};
-  padding: ${theme.spacing.xs} ${theme.spacing.sm};
-  border-radius: ${theme.borderRadius.full};
-  font-weight: ${theme.typography.fontWeight.medium};
-`;
-
-const LoadingMessage = styled.p`
-  font-size: ${theme.typography.fontSize.lg};
-  color: ${theme.colors.gray[600]};
-  text-align: center;
-  padding: ${theme.spacing['2xl']} 0;
-`;
-
-const InfoSection = styled.section`
-  background-color: ${theme.colors.background.secondary};
-  padding: ${theme.spacing['3xl']} 0;
-  margin-top: ${theme.spacing['3xl']};
-`;
-
-const InfoTitle = styled.h2`
-  font-size: ${theme.typography.fontSize['4xl']};
-  font-weight: ${theme.typography.fontWeight.bold};
-  color: ${theme.colors.gray[800]};
-  text-align: center;
-  margin-bottom: ${theme.spacing['2xl']};
-`;
-
-const InfoGrid = styled(Grid)`
-  margin-bottom: ${theme.spacing['2xl']};
-`;
-
-const InfoCard = styled.div`
-  background-color: ${theme.colors.white};
-  border-radius: ${theme.borderRadius.lg};
-  padding: ${theme.spacing.xl};
-  box-shadow: ${theme.shadows.base};
-  text-align: center;
-  transition: all 0.2s ease;
-  
-  &:hover {
-    box-shadow: ${theme.shadows.lg};
-    transform: translateY(-4px);
-  }
-`;
-
-const InfoCardIcon = styled.div`
-  font-size: ${theme.typography.fontSize['5xl']};
-  margin-bottom: ${theme.spacing.md};
-`;
-
-const InfoCardTitle = styled.h3`
-  font-size: ${theme.typography.fontSize.xl};
-  font-weight: ${theme.typography.fontWeight.semibold};
-  color: ${theme.colors.gray[800]};
-  margin-bottom: ${theme.spacing.md};
-`;
-
-const InfoCardText = styled.p`
-  font-size: ${theme.typography.fontSize.base};
-  color: ${theme.colors.gray[600]};
-  line-height: 1.6;
-`;
-
-const CTASection = styled.div`
-  text-align: center;
-  padding-top: ${theme.spacing.xl};
-`;
-
-const CTATitle = styled.h3`
-  font-size: ${theme.typography.fontSize['2xl']};
-  font-weight: ${theme.typography.fontWeight.semibold};
-  color: ${theme.colors.gray[800]};
-  margin-bottom: ${theme.spacing.lg};
-`;
-
-const CTAButtons = styled.div`
-  display: flex;
-  gap: ${theme.spacing.md};
-  justify-content: center;
-  
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: center;
-  }
-`;
-
-const CTAButton = styled(Link)<{ primary?: boolean }>`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: ${theme.spacing.md} ${theme.spacing.xl};
-  font-size: ${theme.typography.fontSize.lg};
-  font-weight: ${theme.typography.fontWeight.semibold};
-  border-radius: ${theme.borderRadius.md};
-  text-decoration: none;
-  transition: all 0.2s ease;
-  min-width: 180px;
-  
-  ${props => props.primary ? `
-    background-color: ${theme.colors.primary};
-    color: ${theme.colors.white};
-    
-    &:hover {
-      background-color: ${theme.colors.primaryDark};
-      transform: translateY(-2px);
-      box-shadow: ${theme.shadows.lg};
-    }
-  ` : `
-    background-color: ${theme.colors.white};
-    color: ${theme.colors.primary};
-    border: 2px solid ${theme.colors.primary};
-    
-    &:hover {
-      background-color: ${theme.colors.purple[50]};
-      transform: translateY(-2px);
-    }
-  `}
+const SellerContent = styled.div`max-width: 600px; margin: 0 auto;`;
+const SellerTitle = styled.h2`font-size: 32px; font-weight: bold; margin-bottom: 16px;`;
+const SellerDesc = styled.p`font-size: 18px; color: ${theme.colors.gray[400]}; margin-bottom: 32px; line-height: 1.6;`;
+const SellerButton = styled(Link)`
+    display: inline-block; padding: 16px 32px; background: ${theme.colors.primary}; color: white;
+    font-weight: bold; border-radius: 8px; text-decoration: none; transition: background 0.2s;
+    &:hover { background: ${theme.colors.primaryDark}; }
 `;

@@ -12,7 +12,7 @@ const Footer: React.FC = () => {
         <FooterTop>
           <FooterColumn>
             <FooterLogo>
-              <Logo>⭐</Logo>
+              <img src="/kaist-ball.png" alt="ReviewTrust Logo" style={{ width: '32px', height: '32px' }} />
               <LogoText>ReviewTrust</LogoText>
             </FooterLogo>
             <FooterDescription>
@@ -67,7 +67,7 @@ const Footer: React.FC = () => {
 
         <FooterBottom>
           <Copyright>
-            © 2024 ReviewTrust. All rights reserved.
+            © 2025 ReviewTrust. All rights reserved.
           </Copyright>
           <FooterLinks>
             <FooterBottomLink to="/about">회사 소개</FooterBottomLink>
@@ -148,10 +148,6 @@ const FooterLogo = styled.div`
   align-items: center;
   gap: ${theme.spacing.sm};
   margin-bottom: ${theme.spacing.sm};
-`;
-
-const Logo = styled.div`
-  font-size: ${theme.typography.fontSize['2xl']};
 `;
 
 const LogoText = styled.h2`
