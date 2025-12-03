@@ -3810,19 +3810,318 @@ ABC 주스도 자주 해먹고요..
     originalUrl : 'https://search.shopping.naver.com/catalog/53072879277?query=%EB%AF%B9%EC%84%9C%EA%B8%B0&NaPm=ct%3Dmipbi3qw%7Cci%3D381414341148e911d5218aaec644c87893484bce%7Ctr%3Dslsl%7Csn%3D95694%7Chk%3D968714613c2d042ba490af26c3db186ff0c77ee2',
   },
   
+  // --------------------------------------------------------------------------
+  // [신규 추가] 전자기기 (Electronics)
+  // --------------------------------------------------------------------------
+  {
+    _id: 'elec_1',
+    title: '노이즈 캔슬링의 신세계, 출퇴근 필수템',
+    content: `지하철 소음 때문에 스트레스 받다가 큰맘 먹고 구매했습니다. 
+    착용하자마자 세상과 단절되는 느낌... 너무 좋네요. 
+    음질은 소니답게 베이스가 탄탄하고, 전작보다 디자인이 슬림해져서 요다 현상도 덜해요.
+    다만 여름에 오래 끼고 있으면 귀에 땀이 좀 차는 건 어쩔 수 없네요 ㅠㅠ
+    배터리는 진짜 오래갑니다. 일주일에 한 번 충전해요.`,
+    author: '음향기기덕후',
+    authorId: 'user_elec_1',
+    category: '전자기기',
+    rating: 5,
+    productName: '소니 WH-1000XM5 노이즈 캔슬링 헤드폰',
+    productBrand: 'SONY',
+    imageUrl: 'https://shopping-phinf.pstatic.net/main_3333333/3333333.jpg', // Placeholder
+    created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    trustScore: 96,
+    helpfulVotes: 156,
+    notHelpfulVotes: 2,
+    verifiedPurchase: true,
+    purchaseDate: '2025-01-15',
+    usagePeriod: '3개월',
+    pros: ['압도적 노이즈캔슬링', '가벼운 무게', '오래가는 배터리'],
+    cons: ['여름엔 더움', '가격이 비쌈'],
+    tags: ['노이즈캔슬링', '헤드폰', '출퇴근용', '소니'],
+    isSponsored: false,
+    views: 8500,
+    sourcePlatform: 'ReviewTrust'
+  },
+  {
+    _id: 'elec_2',
+    title: '가성비 태블릿 끝판왕, 영상 머신으로 딱',
+    content: `아이패드까지는 필요 없고 넷플릭스랑 유튜브 머신이 필요해서 샀습니다.
+    화면 쨍하고 스피커 4개라 소리 빵빵하고 좋네요.
+    게임은 고사양은 좀 버벅이는데 캐주얼 게임은 잘 돌아갑니다.
+    가장 좋은 건 배터리.. 진짜 안 닳아요.
+    저렴한 가격에 막 굴리기 좋은 태블릿 찾으시면 강추합니다.`,
+    author: '넷플릭스중독',
+    authorId: 'user_elec_2',
+    category: '전자기기',
+    rating: 4,
+    productName: '레노버 P12 태블릿',
+    productBrand: 'Lenovo',
+    imageUrl: 'https://shopping-phinf.pstatic.net/main_3333333/3333333.jpg', // Placeholder
+    created_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+    trustScore: 88,
+    helpfulVotes: 45,
+    notHelpfulVotes: 1,
+    verifiedPurchase: true,
+    purchaseDate: '2024-12-20',
+    usagePeriod: '6개월',
+    pros: ['미친 가성비', '디스플레이 품질', '쿼드 스피커'],
+    cons: ['충전 속도 느림', '고사양 게임 불가'],
+    tags: ['가성비태블릿', '영상시청용', '레노버'],
+    isSponsored: false,
+    views: 3200,
+    sourcePlatform: 'ReviewTrust'
+  },
 
+  // --------------------------------------------------------------------------
+  // [신규 추가] 패션/뷰티 (Fashion/Beauty)
+  // --------------------------------------------------------------------------
+  {
+    _id: 'beauty_1',
+    title: '속건조 잡는 인생 수분크림 발견',
+    content: `환절기만 되면 피부 뒤집어지는 수부지 피부입니다.
+    유명하다는 거 다 써봤는데 이게 찐이네요.
+    바를 땐 가벼운 것 같은데 흡수되고 나면 속이 꽉 채워지는 느낌?
+    아침에 화장도 안 밀리고 저녁까지 건조함이 없어요.
+    무향이라 호불호도 없을 것 같고 튜브형이라 위생적입니다.
+    대용량 나오면 무조건 삽니다.`,
+    author: '코덕10년차',
+    authorId: 'user_beauty_1',
+    category: '패션/뷰티',
+    rating: 5,
+    productName: '일리윤 세라마이드 아토 집중 크림',
+    productBrand: '일리윤',
+    imageUrl: 'https://shopping-phinf.pstatic.net/main_4444444/4444444.jpg',
+    created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    trustScore: 93,
+    helpfulVotes: 89,
+    notHelpfulVotes: 0,
+    verifiedPurchase: true,
+    purchaseDate: '2025-02-10',
+    usagePeriod: '1개월',
+    pros: ['속보습 탁월', '순한 성분', '가성비'],
+    cons: ['튜브 끝까지 짜쓰기 힘들다'],
+    tags: ['수분크림', '민감성피부', '보습템', '올리브영추천'],
+    isSponsored: false,
+    views: 5600,
+    sourcePlatform: 'ReviewTrust'
+  },
+  {
+    _id: 'fashion_1',
+    title: '러닝 입문용으로 샀는데 발이 너무 편해요',
+    content: `요즘 러닝 붐이라 시작했는데 무릎이 좀 아파서 신발 바꿨어요.
+    쿠션이 너무 푹신하지도 딱딱하지도 않고 딱 잡아주는 느낌?
+    확실히 뛰고 나서 발바닥 피로도가 덜하네요.
+    사이즈는 반업 하시는 걸 추천드립니다. 발볼이 좀 좁게 나왔어요.
+    디자인도 깔끔해서 평소에 신고 다녀도 이쁩니다.`,
+    author: '달려라하니',
+    authorId: 'user_fashion_1',
+    category: '패션/뷰티',
+    rating: 5,
+    productName: '나이키 에어 줌 페가수스 40',
+    productBrand: 'NIKE',
+    imageUrl: 'https://shopping-phinf.pstatic.net/main_5555555/5555555.jpg',
+    created_at: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
+    trustScore: 90,
+    helpfulVotes: 67,
+    notHelpfulVotes: 3,
+    verifiedPurchase: true,
+    purchaseDate: '2024-11-11',
+    usagePeriod: '4개월',
+    pros: ['적당한 쿠셔닝', '발목 지지력', '통기성'],
+    cons: ['발볼이 좁음'],
+    tags: ['러닝화', '운동화', '나이키', '입문용'],
+    isSponsored: false,
+    views: 4100,
+    sourcePlatform: 'ReviewTrust'
+  },
 
+  // --------------------------------------------------------------------------
+  // [신규 추가] 식품/음료 (Food/Beverage)
+  // --------------------------------------------------------------------------
+  {
+    _id: 'food_1',
+    title: '비린내 없는 초코맛 프로틴 쉐이크',
+    content: `운동하고 단백질 챙겨 먹어야 하는데 특유의 비린맛 때문에 못 먹던 1인입니다.
+    이건 진짜 그냥 진한 초코우유 맛이에요 ㅋㅋ
+    물에 타먹어도 맛있고 우유에 타먹으면 그냥 속세의 맛..
+    당류도 낮아서 다이어트할 때 죄책감 없이 먹기 좋습니다.
+    가루 뭉침도 거의 없고 찬물에도 잘 녹아요.
+    가격이 조금만 더 착했으면 좋겠지만 맛 때문에 계속 재구매할 듯.`,
+    author: '헬스초보',
+    authorId: 'user_food_1',
+    category: '식품/음료',
+    rating: 5,
+    productName: '마이프로틴 임팩트 웨이 아이솔레이트 초콜릿',
+    productBrand: 'MyProtein',
+    imageUrl: 'https://shopping-phinf.pstatic.net/main_6666666/6666666.jpg',
+    created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    trustScore: 89,
+    helpfulVotes: 112,
+    notHelpfulVotes: 5,
+    verifiedPurchase: true,
+    purchaseDate: '2025-03-01',
+    usagePeriod: '2주',
+    pros: ['맛있음', '풀림 좋음', '성분 좋음'],
+    cons: ['배송이 느림(직구)'],
+    tags: ['단백질쉐이크', '다이어트', '운동식단'],
+    isSponsored: false,
+    views: 7200,
+    sourcePlatform: 'ReviewTrust'
+  },
+  {
+    _id: 'food_2',
+    title: '간편하게 먹기 좋은 닭가슴살 큐브',
+    content: `매번 삶아 먹기 귀찮아서 주문해봤습니다.
+    큐브 형태라 한입에 먹기 편하고 소스가 다양해서 질리지 않아요.
+    특히 청양마요 맛이 진짜 맛있습니다.
+    전자레인지 1분 30초면 끝나니까 도시락 싸기도 편하구요.
+    다만 양이 좀 적은 느낌이라 한 끼에 두 팩은 먹어야 배가 찹니다.`,
+    author: '식단관리중',
+    authorId: 'user_food_2',
+    category: '식품/음료',
+    rating: 4,
+    productName: '맛있닭 닭가슴살 큐브 10종',
+    productBrand: '랭킹닭컴',
+    imageUrl: 'https://shopping-phinf.pstatic.net/main_7777777/7777777.jpg',
+    created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+    trustScore: 82,
+    helpfulVotes: 34,
+    notHelpfulVotes: 2,
+    verifiedPurchase: true,
+    purchaseDate: '2025-02-15',
+    usagePeriod: '1개월',
+    pros: ['간편함', '다양한 맛', '부드러운 식감'],
+    cons: ['양이 적음', '소스 때문에 나트륨 걱정'],
+    tags: ['닭가슴살', '간편식', '직장인도시락'],
+    isSponsored: false,
+    views: 2800,
+    sourcePlatform: 'ReviewTrust'
+  },
 
+  // --------------------------------------------------------------------------
+  // [신규 추가] 도서/문구 (Books/Stationery)
+  // --------------------------------------------------------------------------
+  {
+    _id: 'book_1',
+    title: '새해 목표 세우기에 최고의 책',
+    content: `매년 작심삼일로 끝나는 계획 때문에 고민하다가 읽게 되었습니다.
+    '아주 작은 습관의 힘'이라는 제목처럼 거창한 목표보다는
+    시스템을 만드는 게 중요하다는 내용이 와닿았어요.
+    실천하기 쉬운 방법들을 구체적으로 알려줘서 바로 적용해보고 있습니다.
+    삶의 변화를 원하시는 분들께 강력 추천합니다. 
+    번역도 매끄럽고 술술 읽힙니다.`,
+    author: '독서광',
+    authorId: 'user_book_1',
+    category: '도서/문구',
+    rating: 5,
+    productName: '아주 작은 습관의 힘',
+    productBrand: '비즈니스북스',
+    imageUrl: 'https://shopping-phinf.pstatic.net/main_8888888/8888888.jpg',
+    created_at: new Date(Date.now() - 40 * 24 * 60 * 60 * 1000).toISOString(),
+    trustScore: 95,
+    helpfulVotes: 201,
+    notHelpfulVotes: 1,
+    verifiedPurchase: true,
+    purchaseDate: '2025-01-02',
+    usagePeriod: '완독',
+    pros: ['실용적인 조언', '동기부여', '가독성 좋음'],
+    cons: [],
+    tags: ['자기계발', '베스트셀러', '습관형성'],
+    isSponsored: false,
+    views: 9100,
+    sourcePlatform: 'ReviewTrust'
+  },
+  {
+    _id: 'stationery_1',
+    title: '아이패드 종이질감 필름 중 최고',
+    content: `그림 그리는 용도로 아이패드 쓰는데 생패드는 너무 미끄러워서 샀어요.
+    진짜 사각사각거리는 느낌이 종이에 그리는 것 같아요.
+    화질 저하가 심하다는 평이 있어서 걱정했는데 생각보다 괜찮습니다.
+    다만 펜촉이 좀 빨리 닳는 느낌은 있네요.
+    붙이는 가이드툴이 같이 와서 똥손인데도 기포 없이 잘 붙였습니다.`,
+    author: '그림쟁이',
+    authorId: 'user_stationery_1',
+    category: '도서/문구',
+    rating: 4,
+    productName: '종이질감 액정보호필름',
+    productBrand: '뷰에스피',
+    imageUrl: 'https://shopping-phinf.pstatic.net/main_9999999/9999999.jpg',
+    created_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
+    trustScore: 85,
+    helpfulVotes: 42,
+    notHelpfulVotes: 3,
+    verifiedPurchase: true,
+    purchaseDate: '2025-03-10',
+    usagePeriod: '1주',
+    pros: ['필기감 우수', '빛반사 방지', '부착 쉬움'],
+    cons: ['펜촉 마모', '약간의 화질 저하'],
+    tags: ['아이패드필름', '종이질감', '드로잉'],
+    isSponsored: false,
+    views: 3400,
+    sourcePlatform: 'ReviewTrust'
+  },
 
-
-
-  
-  
-  
-  
-  
-  
-
+  // --------------------------------------------------------------------------
+  // [신규 추가] 생활용품 (Daily Necessities)
+  // --------------------------------------------------------------------------
+  {
+    _id: 'daily_1',
+    title: '수건만 바꿔도 삶의 질이 올라가네요',
+    content: `집에 있는 수건이 너무 얇고 냄새나서 호텔 수건으로 싹 바꿨습니다.
+    40수 코마사라 그런지 진짜 도톰하고 부드러워요.
+    물기 흡수도 한 번에 싹 되고 먼지도 별로 안 나네요.
+    처음에 세탁법대로 단독 세탁하고 나니까 더 뽀송해졌어요.
+    색상도 고급스러운 그레이라 욕실 분위기가 달라졌습니다.`,
+    author: '살림고수',
+    authorId: 'user_daily_1',
+    category: '생활용품',
+    rating: 5,
+    productName: '호텔 컬렉션 40수 코마사 수건',
+    productBrand: '송월타월',
+    imageUrl: 'https://shopping-phinf.pstatic.net/main_1010101/1010101.jpg',
+    created_at: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
+    trustScore: 91,
+    helpfulVotes: 76,
+    notHelpfulVotes: 0,
+    verifiedPurchase: true,
+    purchaseDate: '2025-02-28',
+    usagePeriod: '2주',
+    pros: ['흡수력 좋음', '부드러움', '먼지 없음'],
+    cons: ['건조 시간이 좀 걸림'],
+    tags: ['수건', '호텔수건', '욕실용품'],
+    isSponsored: false,
+    views: 4500,
+    sourcePlatform: 'ReviewTrust'
+  },
+  {
+    _id: 'daily_2',
+    title: '향이 너무 좋은 섬유유연제',
+    content: `실내 건조를 주로 해서 꿉꿉한 냄새가 싫어 구매했습니다.
+    일단 향이 너무 강하지 않고 은은해서 머리가 안 아파요.
+    지속력도 꽤 좋아서 옷 입을 때마다 기분이 좋습니다.
+    고농축이라 조금만 써도 돼서 경제적이네요.
+    배송 중에 하나가 좀 샜는데 교환 처리 빨리 해주셔서 좋았습니다.`,
+    author: '향기솔솔',
+    authorId: 'user_daily_2',
+    category: '생활용품',
+    rating: 4,
+    productName: '다우니 실내건조 섬유유연제',
+    productBrand: '다우니',
+    imageUrl: 'https://shopping-phinf.pstatic.net/main_1212121/1212121.jpg',
+    created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    trustScore: 84,
+    helpfulVotes: 28,
+    notHelpfulVotes: 1,
+    verifiedPurchase: true,
+    purchaseDate: '2025-03-12',
+    usagePeriod: '3일',
+    pros: ['탈취 효과', '은은한 향', '고농축'],
+    cons: ['배송 포장 미흡'],
+    tags: ['섬유유연제', '빨래', '실내건조'],
+    isSponsored: false,
+    views: 2900,
+    sourcePlatform: 'ReviewTrust'
+  }
 ];
 
 export const mockTopReviewers: TopReviewer[] = [
@@ -5042,12 +5341,40 @@ export const mockTopReviewers: TopReviewer[] = [
     memberSince: '2021-11-07',
     badges: ['사용 솔직 리뷰어'],
     profileImage: undefined
+  },
+  {
+    _id: 'reviewer_new_1',
+    nickname: '음향기기덕후',
+    trustScore: 96,
+    reviewCount: 42,
+    rewardPoints: 15400,
+    totalHelpfulVotes: 890,
+    memberSince: '2020-05-15',
+    badges: ['음향 전문가', '플래티넘 리뷰어'],
+    profileImage: undefined
+  },
+  {
+    _id: 'reviewer_new_2',
+    nickname: '코덕10년차',
+    trustScore: 93,
+    reviewCount: 56,
+    rewardPoints: 12000,
+    totalHelpfulVotes: 1024,
+    memberSince: '2019-11-01',
+    badges: ['뷰티 마스터', '성분 분석가'],
+    profileImage: undefined
+  },
+  {
+    _id: 'reviewer_new_3',
+    nickname: '독서광',
+    trustScore: 95,
+    reviewCount: 120,
+    rewardPoints: 21000,
+    totalHelpfulVotes: 2300,
+    memberSince: '2018-03-22',
+    badges: ['지식 공유자', '베스트 리뷰어'],
+    profileImage: undefined
   }
-
-
-
-
-
 ];
 
 // 리워드 등급 정의
@@ -6365,17 +6692,40 @@ export const mockRewardTransactions: RewardTransaction[] = [
     productName: '테팔 초고속 블렌더 퍼펙트믹스 플러스 트라이탄',
     created_at: new Date(Date.now() - 4 * 86400000).toISOString(),
     status: 'completed'
+  },
+  {
+    _id: 'rt_elec_1',
+    userId: 'reviewer_new_1',
+    type: 'earn',
+    points: 350,
+    reason: '리뷰 작성 보상 (신뢰도 96% + 플래티넘 등급)',
+    relatedReviewId: 'elec_1',
+    productName: '소니 WH-1000XM5',
+    created_at: new Date(Date.now() - 2 * 86400000).toISOString(),
+    status: 'completed'
+  },
+  {
+    _id: 'rt_beauty_1',
+    userId: 'reviewer_new_2',
+    type: 'earn',
+    points: 280,
+    reason: '리뷰 작성 보상 (신뢰도 93% + 골드 등급)',
+    relatedReviewId: 'beauty_1',
+    productName: '일리윤 세라마이드 아토 집중 크림',
+    created_at: new Date(Date.now() - 5 * 86400000).toISOString(),
+    status: 'completed'
+  },
+  {
+    _id: 'rt_book_1',
+    userId: 'reviewer_new_3',
+    type: 'earn',
+    points: 310,
+    reason: '리뷰 작성 보상 (신뢰도 95% + 플래티넘 등급)',
+    relatedReviewId: 'book_1',
+    productName: '아주 작은 습관의 힘',
+    created_at: new Date(Date.now() - 40 * 86400000).toISOString(),
+    status: 'completed'
   }
-  
-
-
-
-
-
-
-
-
-
 ];
 
 // 리워드 계산 함수

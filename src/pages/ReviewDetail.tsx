@@ -1,9 +1,11 @@
+
 // src/pages/ReviewDetail.tsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { Review } from '../types';
+import { Review, AdDetectionResult } from '../types';
 import { reviewService } from '../api/reviewService';
+import { adDetectionService } from '../services/adDetectionService';
 import { theme, Container } from '../styles/GlobalStyle';
 
 const ReviewDetail: React.FC = () => {
@@ -13,6 +15,10 @@ const ReviewDetail: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [userVote, setUserVote] = useState<'helpful' | 'notHelpful' | null>(null);
+  
+  // Ad Detection State
+  const [adResult, setAdResult] = useState<AdDetectionResult | null>(null);
+  const [isAdLoading, setIsAdLoading] = useState<boolean>(false);
 
   useEffect(() => {
     fetchReviewDetail();
@@ -44,6 +50,21 @@ const ReviewDetail: React.FC = () => {
       // Re-fetch simulation (optional)
     } catch (e) {
       console.error('Vote failed');
+    }
+  };
+
+  const handleCheckAd = async () => {
+    if (!review || isAdLoading || adResult) return;
+
+    setIsAdLoading(true);
+    try {
+      const result = await adDetectionService.checkAdLikelihood(review);
+      setAdResult(result);
+    } catch (error) {
+      console.error('Failed to check ad likelihood', error);
+      alert('광고 분석에 실패했습니다.');
+    } finally {
+      setIsAdLoading(false);
     }
   };
 
@@ -110,6 +131,34 @@ const ReviewDetail: React.FC = () => {
                     </VoteButton>
                 </VoteActions>
             </TrustBox>
+
+            <AdDetectionSection>
+              {!adResult ? (
+                <AdCheckButton 
+                  onClick={handleCheckAd}
+                  disabled={isAdLoading}
+                >
+                  {isAdLoading ? '분석 중...' : '🕵️ 이 리뷰 광고인지 분석하기'}
+                </AdCheckButton>
+              ) : (
+                <AdResultBox isAd={adResult.isAdLike}>
+                  <AdResultHeader>
+                    <AdResultTitle isAd={adResult.isAdLike}>
+                      {adResult.isAdLike ? '🚫 광고 의심 리뷰입니다' : '✅ 클린 리뷰입니다'}
+                    </AdResultTitle>
+                    <AdScore>광고 점수: {adResult.adScore}점</AdScore>
+                  </AdResultHeader>
+                  
+                  {adResult.isAdLike && adResult.reasons.length > 0 && (
+                    <AdReasonsList>
+                      {adResult.reasons.map((reason, idx) => (
+                        <AdReasonItem key={idx}>• {reason}</AdReasonItem>
+                      ))}
+                    </AdReasonsList>
+                  )}
+                </AdResultBox>
+              )}
+            </AdDetectionSection>
 
             {/* 외부 원본 링크 (다이어그램 반영: 트래픽 유도) */}
             {review.originalUrl && (
@@ -182,3 +231,69 @@ const Tags = styled.div`margin-top: 20px; display: flex; gap: 8px; flex-wrap: wr
 const Tag = styled.span`color: ${theme.colors.primary}; background: ${theme.colors.purple[50]}; padding: 4px 10px; border-radius: 15px; font-size: 13px;`;
 const LoadingContainer = styled.div`height: 50vh; display: flex; justify-content: center; align-items: center;`;
 const ErrorContainer = styled.div`text-align: center; padding: 50px;`;
+
+// Ad Detection Styles
+const AdDetectionSection = styled.div`
+  margin-top: 20px;
+`;
+
+const AdCheckButton = styled.button`
+  width: 100%;
+  padding: 12px;
+  background: ${theme.colors.gray[100]};
+  border: 1px dashed ${theme.colors.gray[400]};
+  border-radius: 8px;
+  color: ${theme.colors.gray[700]};
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  &:hover {
+    background: ${theme.colors.gray[200]};
+    border-color: ${theme.colors.gray[500]};
+  }
+  &:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+`;
+
+const AdResultBox = styled.div<{ isAd: boolean }>`
+  padding: 16px;
+  border-radius: 8px;
+  background: ${props => props.isAd ? theme.colors.red[50] : theme.colors.green[50]};
+  border: 1px solid ${props => props.isAd ? theme.colors.red[200] : theme.colors.green[200]};
+`;
+
+const AdResultHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+`;
+
+const AdResultTitle = styled.div<{ isAd: boolean }>`
+  font-weight: bold;
+  font-size: 16px;
+  color: ${props => props.isAd ? theme.colors.danger : theme.colors.success};
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const AdScore = styled.div`
+  font-size: 13px;
+  color: ${theme.colors.gray[600]};
+`;
+
+const AdReasonsList = styled.div`
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(0,0,0,0.05);
+`;
+
+const AdReasonItem = styled.div`
+  font-size: 13px;
+  color: ${theme.colors.gray[700]};
+  margin-bottom: 4px;
+  &:last-child { margin-bottom: 0; }
+`;

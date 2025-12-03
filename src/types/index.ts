@@ -118,6 +118,16 @@ export interface FilterOptions {
   minRating?: number;
   maxRating?: number;
   verifiedOnly?: boolean;
-  sortBy?: 'recent' | 'trustScore' | 'helpful' | 'rating';
+  sortBy?: 'recent' | 'trustScore' | 'helpful' | 'rating' | 'reviewCount';
   keyword?: string;
+}
+
+export interface AdDetectionResult {
+  requestId: string;
+  reviewId: string;
+  isAdLike: boolean;
+  adScore: number;
+  threshold: number;
+  modelVersion: string;
+  reasons: string[];
 }
