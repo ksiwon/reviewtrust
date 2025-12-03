@@ -118,6 +118,6 @@ export interface FilterOptions {
   minRating?: number;
   maxRating?: number;
   verifiedOnly?: boolean;
-  sortBy?: 'recent' | 'trustScore' | 'helpful' | 'rating';
+  sortBy?: 'recent' | 'trustScore' | 'helpful' | 'rating' | 'reviewCount';
   keyword?: string;
 }

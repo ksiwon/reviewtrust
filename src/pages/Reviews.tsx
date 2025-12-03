@@ -27,12 +27,11 @@ const Reviews: React.FC = () => {
     category: searchParams.get('category') || '',
     keyword: searchParams.get('keyword') || '',
     minRating: undefined,
-    verifiedOnly: searchParams.get('verified') === 'true',
-    sortBy: (searchParams.get('sort') as FilterOptions['sortBy']) || 'recent'
+    sortBy: (searchParams.get('sort') as FilterOptions['sortBy']) || 'reviewCount'
   });
   
   const [pagination, setPagination] = useState<PaginationInfo>({
-    currentPage: 1, totalPages: 1, totalItems: 0, itemsPerPage: 5 // 제품 그룹 단위로 페이지네이션 (페이지당 5개 제품)
+    currentPage: 1, totalPages: 1, totalItems: 0, itemsPerPage: 10 // 제품 그룹 단위로 페이지네이션 (페이지당 5개 제품)
   });
 
   useEffect(() => {
@@ -71,10 +70,6 @@ const Reviews: React.FC = () => {
       const totalTrust = group.reviews.reduce((sum, r) => sum + r.trustScore, 0);
       const count = group.reviews.length;
       
-      // 그룹 내 리뷰 정렬 (최신순 등) - 필요시 로직 추가
-      // 현재는 API에서 받아온 순서(필터 정렬)를 유지한다고 가정하지만, 
-      // 그룹핑 후에는 그룹 내 정렬이 필요할 수 있음. 여기서는 기본적으로 최신순 유지.
-      
       return {
         ...group,
         averageRating: totalRating / count,
@@ -92,6 +87,15 @@ const Reviews: React.FC = () => {
       
       // 2. 제품별로 그룹핑
       const groups = groupReviews(data);
+
+      // 그룹 정렬
+      if (filters.sortBy === 'reviewCount') {
+        groups.sort((a, b) => b.reviewCount - a.reviewCount);
+      } else if (filters.sortBy === 'rating') {
+        groups.sort((a, b) => b.averageRating - a.averageRating);
+      } else if (filters.sortBy === 'trustScore') {
+        groups.sort((a, b) => b.averageTrustScore - a.averageTrustScore);
+      }
       
       setAllGroups(groups);
       setPagination(prev => ({
@@ -114,7 +118,6 @@ const Reviews: React.FC = () => {
     const params = new URLSearchParams();
     if (updatedFilters.category) params.set('category', updatedFilters.category);
     if (updatedFilters.keyword) params.set('keyword', updatedFilters.keyword);
-    if (updatedFilters.verifiedOnly) params.set('verified', 'true');
     if (updatedFilters.sortBy) params.set('sort', updatedFilters.sortBy);
     setSearchParams(params);
   };
@@ -166,17 +169,13 @@ const Reviews: React.FC = () => {
             <FilterGroup>
               <FilterLabel>정렬:</FilterLabel>
               <Select value={filters.sortBy} onChange={(e) => handleFilterChange({ sortBy: e.target.value as any })}>
+                <option value="reviewCount">리뷰 많은 순</option>
                 <option value="recent">최신순</option>
                 <option value="trustScore">신뢰도순</option>
                 <option value="helpful">도움됨순</option>
                 <option value="rating">평점순</option>
               </Select>
             </FilterGroup>
-            
-            <CheckboxGroup>
-              <Checkbox type="checkbox" id="verified" checked={filters.verifiedOnly} onChange={(e) => handleFilterChange({ verifiedOnly: e.target.checked })} />
-              <CheckboxLabel htmlFor="verified">✓ 구매인증만 보기</CheckboxLabel>
-            </CheckboxGroup>
           </FilterRow>
         </FilterSection>
 
@@ -187,7 +186,7 @@ const Reviews: React.FC = () => {
             <EmptyMessage>
               <EmptyIcon>😔</EmptyIcon>
               <EmptyText>조건에 맞는 제품이 없습니다.</EmptyText>
-              <Button onClick={() => setFilters({ category: '', keyword: '', minRating: undefined, verifiedOnly: false, sortBy: 'recent' })}>필터 초기화</Button>
+              <Button onClick={() => setFilters({ category: '', keyword: '', minRating: undefined, sortBy: 'reviewCount' })}>필터 초기화</Button>
             </EmptyMessage>
           ) : (
             <>
@@ -204,7 +203,7 @@ const Reviews: React.FC = () => {
                     disabled={pagination.currentPage === 1} 
                     onClick={() => handlePageChange(pagination.currentPage - 1)}
                   >
-                    &lt; 이전
+                    &lt;
                   </PageButton>
                   {[...Array(pagination.totalPages)].map((_, i) => (
                     <PageButton 
@@ -219,7 +218,7 @@ const Reviews: React.FC = () => {
                     disabled={pagination.currentPage === pagination.totalPages} 
                     onClick={() => handlePageChange(pagination.currentPage + 1)}
                   >
-                    다음 &gt;
+                    &gt;
                   </PageButton>
                 </PaginationContainer>
               )}
@@ -375,9 +374,6 @@ const CategoryButton = styled.button<{ active: boolean }>`
   &:hover { border-color: ${theme.colors.primary}; }
 `;
 const Select = styled.select`padding: ${theme.spacing.sm} ${theme.spacing.md}; border-radius: ${theme.borderRadius.md}; border: 1px solid ${theme.colors.gray[300]};`;
-const CheckboxGroup = styled.div`display: flex; align-items: center; gap: ${theme.spacing.sm};`;
-const Checkbox = styled.input`cursor: pointer;`;
-const CheckboxLabel = styled.label`cursor: pointer; font-size: ${theme.typography.fontSize.sm};`;
 
 const LoadingMessage = styled.div`text-align: center; padding: 40px; color: ${theme.colors.gray[600]};`;
 const EmptyMessage = styled.div`text-align: center; padding: 40px;`;
