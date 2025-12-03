@@ -5,11 +5,23 @@ import styled from 'styled-components';
 import { Review, FilterOptions, PaginationInfo } from '../types';
 import { categories } from '../data/mockData';
 import { reviewService } from '../api/reviewService';
-import { theme, Container, Section, SectionTitle, Input, Button, Grid } from '../styles/GlobalStyle';
+import { theme, Container, Section, SectionTitle, Input, Button } from '../styles/GlobalStyle';
+
+interface ProductGroup {
+  productName: string;
+  productBrand: string;
+  category: string;
+  imageUrl: string;
+  reviews: Review[];
+  averageRating: number;
+  averageTrustScore: number;
+  reviewCount: number;
+}
 
 const Reviews: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [reviews, setReviews] = useState<Review[]>([]);
+  const [allGroups, setAllGroups] = useState<ProductGroup[]>([]);
+  const [displayedGroups, setDisplayedGroups] = useState<ProductGroup[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [filters, setFilters] = useState<FilterOptions>({
     category: searchParams.get('category') || '',
@@ -20,25 +32,75 @@ const Reviews: React.FC = () => {
   });
   
   const [pagination, setPagination] = useState<PaginationInfo>({
-    currentPage: 1, totalPages: 1, totalItems: 0, itemsPerPage: 12
+    currentPage: 1, totalPages: 1, totalItems: 0, itemsPerPage: 5 // 제품 그룹 단위로 페이지네이션 (페이지당 5개 제품)
   });
 
   useEffect(() => {
-    fetchReviews();
+    fetchAndGroupReviews();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters, pagination.currentPage]);
+  }, [filters]);
 
-  const fetchReviews = async () => {
+  useEffect(() => {
+    // 페이지네이션 처리
+    const startIndex = (pagination.currentPage - 1) * pagination.itemsPerPage;
+    const endIndex = startIndex + pagination.itemsPerPage;
+    setDisplayedGroups(allGroups.slice(startIndex, endIndex));
+  }, [pagination.currentPage, allGroups, pagination.itemsPerPage]);
+
+  const groupReviews = (reviews: Review[]): ProductGroup[] => {
+    const groups: { [key: string]: ProductGroup } = {};
+
+    reviews.forEach(review => {
+      if (!groups[review.productName]) {
+        groups[review.productName] = {
+          productName: review.productName,
+          productBrand: review.productBrand || '',
+          category: review.category,
+          imageUrl: review.imageUrl,
+          reviews: [],
+          averageRating: 0,
+          averageTrustScore: 0,
+          reviewCount: 0
+        };
+      }
+      groups[review.productName].reviews.push(review);
+    });
+
+    return Object.values(groups).map(group => {
+      const totalRating = group.reviews.reduce((sum, r) => sum + r.rating, 0);
+      const totalTrust = group.reviews.reduce((sum, r) => sum + r.trustScore, 0);
+      const count = group.reviews.length;
+      
+      // 그룹 내 리뷰 정렬 (최신순 등) - 필요시 로직 추가
+      // 현재는 API에서 받아온 순서(필터 정렬)를 유지한다고 가정하지만, 
+      // 그룹핑 후에는 그룹 내 정렬이 필요할 수 있음. 여기서는 기본적으로 최신순 유지.
+      
+      return {
+        ...group,
+        averageRating: totalRating / count,
+        averageTrustScore: Math.round(totalTrust / count),
+        reviewCount: count
+      };
+    });
+  };
+
+  const fetchAndGroupReviews = async () => {
     setIsLoading(true);
     try {
+      // 1. 필터에 맞는 모든 리뷰를 가져옴
       const data = await reviewService.getReviews(filters);
-      // Pagination simulation logic (normally backend does this)
+      
+      // 2. 제품별로 그룹핑
+      const groups = groupReviews(data);
+      
+      setAllGroups(groups);
       setPagination(prev => ({
         ...prev,
-        totalItems: data.length,
-        totalPages: Math.ceil(data.length / prev.itemsPerPage)
+        currentPage: 1, // 필터 변경 시 1페이지로 리셋
+        totalItems: groups.length,
+        totalPages: Math.ceil(groups.length / prev.itemsPerPage)
       }));
-      setReviews(data);
+
     } catch (error) {
       console.error(error);
     } finally {
@@ -55,33 +117,23 @@ const Reviews: React.FC = () => {
     if (updatedFilters.verifiedOnly) params.set('verified', 'true');
     if (updatedFilters.sortBy) params.set('sort', updatedFilters.sortBy);
     setSearchParams(params);
-    setPagination(prev => ({ ...prev, currentPage: 1 }));
   };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    fetchReviews();
+    fetchAndGroupReviews();
   };
 
-  const getTrustBadgeColor = (score: number): string => {
-    if (score >= 90) return theme.colors.trust.excellent;
-    if (score >= 70) return theme.colors.trust.good;
-    if (score >= 50) return theme.colors.trust.fair;
-    return theme.colors.trust.poor;
-  };
-
-  const getTrustBadgeText = (score: number): string => {
-    if (score >= 90) return '매우 신뢰';
-    if (score >= 70) return '신뢰';
-    if (score >= 50) return '보통';
-    return '주의';
+  const handlePageChange = (newPage: number) => {
+    setPagination(prev => ({ ...prev, currentPage: newPage }));
+    window.scrollTo(0, 0);
   };
 
   return (
     <ReviewsContainer>
       <Container>
         <PageHeader>
-          <SectionTitle>제품 리뷰</SectionTitle>
+          <SectionTitle>제품별 리뷰 모아보기</SectionTitle>
           <HeaderActions>
             <Button as={Link} to="/write-review">리뷰 작성하기</Button>
           </HeaderActions>
@@ -131,47 +183,47 @@ const Reviews: React.FC = () => {
         <Section>
           {isLoading ? (
             <LoadingMessage>리뷰를 불러오는 중입니다...</LoadingMessage>
-          ) : reviews.length === 0 ? (
+          ) : displayedGroups.length === 0 ? (
             <EmptyMessage>
               <EmptyIcon>😔</EmptyIcon>
-              <EmptyText>조건에 맞는 리뷰가 없습니다.</EmptyText>
+              <EmptyText>조건에 맞는 제품이 없습니다.</EmptyText>
               <Button onClick={() => setFilters({ category: '', keyword: '', minRating: undefined, verifiedOnly: false, sortBy: 'recent' })}>필터 초기화</Button>
             </EmptyMessage>
           ) : (
-            <ReviewGrid>
-              {reviews.map((review) => (
-                <ReviewCard key={review._id} to={`/review/${review._id}`}>
-                  <ReviewImageWrapper>
-                    <ReviewImage src={review.imageUrl} alt={review.title} />
-                    {review.verifiedPurchase && <VerifiedBadge>✓ 구매인증</VerifiedBadge>}
-                    <TrustScoreBadge color={getTrustBadgeColor(review.trustScore)}>
-                      {getTrustBadgeText(review.trustScore)} {review.trustScore}%
-                    </TrustScoreBadge>
-                  </ReviewImageWrapper>
-                  
-                  <ReviewContent>
-                    <ProductInfo>
-                      <CategoryTag>{review.category}</CategoryTag>
-                      <ProductBrand>{review.productBrand}</ProductBrand>
-                    </ProductInfo>
-                    
-                    <ProductName>{review.productName}</ProductName>
-                    <ReviewTitle>{review.title}</ReviewTitle>
-                    
-                    <RatingRow>
-                      <Stars>{'★'.repeat(Math.floor(review.rating))}{review.rating % 1 !== 0 && '½'}{'☆'.repeat(5 - Math.ceil(review.rating))}</Stars>
-                      <RatingText>{review.rating.toFixed(1)}</RatingText>
-                    </RatingRow>
-                    
-                    <ReviewMeta>
-                      <MetaItem><MetaIcon>👤</MetaIcon><MetaText>{review.author}</MetaText></MetaItem>
-                      <MetaItem><MetaIcon>👍</MetaIcon><MetaText>{review.helpfulVotes}</MetaText></MetaItem>
-                      <MetaItem><MetaIcon>👁</MetaIcon><MetaText>{review.views}</MetaText></MetaItem>
-                    </ReviewMeta>
-                  </ReviewContent>
-                </ReviewCard>
-              ))}
-            </ReviewGrid>
+            <>
+              <ProductList>
+                {displayedGroups.map((group) => (
+                  <ProductGroupItem key={group.productName} group={group} />
+                ))}
+              </ProductList>
+              
+              {/* 페이지네이션 UI */}
+              {pagination.totalPages > 1 && (
+                <PaginationContainer>
+                  <PageButton 
+                    disabled={pagination.currentPage === 1} 
+                    onClick={() => handlePageChange(pagination.currentPage - 1)}
+                  >
+                    &lt; 이전
+                  </PageButton>
+                  {[...Array(pagination.totalPages)].map((_, i) => (
+                    <PageButton 
+                      key={i + 1} 
+                      active={pagination.currentPage === i + 1}
+                      onClick={() => handlePageChange(i + 1)}
+                    >
+                      {i + 1}
+                    </PageButton>
+                  ))}
+                  <PageButton 
+                    disabled={pagination.currentPage === pagination.totalPages} 
+                    onClick={() => handlePageChange(pagination.currentPage + 1)}
+                  >
+                    다음 &gt;
+                  </PageButton>
+                </PaginationContainer>
+              )}
+            </>
           )}
         </Section>
       </Container>
@@ -179,9 +231,132 @@ const Reviews: React.FC = () => {
   );
 };
 
+// Sub-component for Product Group Item
+const ProductGroupItem: React.FC<{ group: ProductGroup }> = ({ group }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 12;
+
+  // Reset pagination when group changes (e.g. filtering)
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [group.reviews]);
+
+  const getTrustBadgeColor = (score: number): string => {
+    if (score >= 90) return theme.colors.trust.excellent;
+    if (score >= 70) return theme.colors.trust.good;
+    if (score >= 50) return theme.colors.trust.fair;
+    return theme.colors.trust.poor;
+  };
+
+  const totalPages = Math.ceil(group.reviews.length / ITEMS_PER_PAGE);
+  const currentReviews = group.reviews.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    // Optional: scroll to top of review list if needed
+    // const element = document.getElementById(`review-list-${group.productName}`);
+    // if (element) element.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  return (
+    <ProductCardWrapper>
+      <ProductHeader onClick={() => setIsExpanded(!isExpanded)}>
+        <ProductImage src={group.imageUrl} alt={group.productName} />
+        <ProductInfoMain>
+          <ProductBrand>{group.productBrand}</ProductBrand>
+          <ProductTitle>{group.productName}</ProductTitle>
+          <ProductStats>
+            <StatItem>
+              <Stars>{'★'.repeat(Math.floor(group.averageRating))}{group.averageRating % 1 !== 0 && '½'}</Stars>
+              <StatValue>{group.averageRating.toFixed(1)}</StatValue>
+            </StatItem>
+            <StatDivider />
+            <StatItem>
+              <StatLabel>평균 신뢰도</StatLabel>
+              <TrustScoreText color={getTrustBadgeColor(group.averageTrustScore)}>
+                {group.averageTrustScore}%
+              </TrustScoreText>
+            </StatItem>
+            <StatDivider />
+            <StatItem>
+              <StatLabel>리뷰</StatLabel>
+              <StatValue>{group.reviewCount}개</StatValue>
+            </StatItem>
+          </ProductStats>
+        </ProductInfoMain>
+        <ExpandButton isExpanded={isExpanded}>
+          {isExpanded ? '접기 ▲' : '리뷰 보기 ▼'}
+        </ExpandButton>
+      </ProductHeader>
+
+      {isExpanded && (
+        <ReviewListContainer>
+          <ReviewListHeader>
+            <ReviewListTitle>등록된 리뷰 {group.reviewCount}개</ReviewListTitle>
+          </ReviewListHeader>
+          <ReviewGrid>
+            {currentReviews.map((review) => (
+              <ReviewCard key={review._id} to={`/review/${review._id}`}>
+                <ReviewCardHeader>
+                  <ReviewUser>
+                    <UserIcon>👤</UserIcon>
+                    <UserName>{review.author}</UserName>
+                  </ReviewUser>
+                  <TrustBadgeSmall color={getTrustBadgeColor(review.trustScore)}>
+                    신뢰도 {review.trustScore}%
+                  </TrustBadgeSmall>
+                </ReviewCardHeader>
+                <ReviewCardContent>
+                  <ReviewTitle>{review.title}</ReviewTitle>
+                  <RatingRowSmall>
+                    <StarsSmall>★ {review.rating.toFixed(1)}</StarsSmall>
+                    <DateText>{new Date(review.created_at).toLocaleDateString()}</DateText>
+                  </RatingRowSmall>
+                  <ReviewSnippet>{review.content.substring(0, 100)}...</ReviewSnippet>
+                </ReviewCardContent>
+              </ReviewCard>
+            ))}
+          </ReviewGrid>
+
+          {/* Pagination for reviews within the group */}
+          {totalPages > 1 && (
+            <PaginationContainer style={{ marginTop: '24px' }}>
+              <PageButton 
+                disabled={currentPage === 1} 
+                onClick={(e) => { e.stopPropagation(); handlePageChange(currentPage - 1); }}
+              >
+                &lt;
+              </PageButton>
+              {[...Array(totalPages)].map((_, i) => (
+                <PageButton 
+                  key={i + 1} 
+                  active={currentPage === i + 1}
+                  onClick={(e) => { e.stopPropagation(); handlePageChange(i + 1); }}
+                >
+                  {i + 1}
+                </PageButton>
+              ))}
+              <PageButton 
+                disabled={currentPage === totalPages} 
+                onClick={(e) => { e.stopPropagation(); handlePageChange(currentPage + 1); }}
+              >
+                &gt;
+              </PageButton>
+            </PaginationContainer>
+          )}
+        </ReviewListContainer>
+      )}
+    </ProductCardWrapper>
+  );
+};
+
 export default Reviews;
 
-// Styled components (shortened for brevity, but would be included)
+// Styled components
 const ReviewsContainer = styled.div`width: 100%; min-height: 100vh; padding: ${theme.spacing.xl} 0;`;
 const PageHeader = styled.div`display: flex; justify-content: space-between; align-items: center; margin-bottom: ${theme.spacing.xl};`;
 const HeaderActions = styled.div`display: flex; gap: ${theme.spacing.md};`;
@@ -203,26 +378,89 @@ const Select = styled.select`padding: ${theme.spacing.sm} ${theme.spacing.md}; b
 const CheckboxGroup = styled.div`display: flex; align-items: center; gap: ${theme.spacing.sm};`;
 const Checkbox = styled.input`cursor: pointer;`;
 const CheckboxLabel = styled.label`cursor: pointer; font-size: ${theme.typography.fontSize.sm};`;
-const ReviewGrid = styled(Grid)`grid-template-columns: repeat(3, 1fr); gap: ${theme.spacing.lg}; @media (max-width: 1024px) { grid-template-columns: repeat(2, 1fr); } @media (max-width: 768px) { grid-template-columns: 1fr; }`;
-const ReviewCard = styled(Link)`background-color: ${theme.colors.white}; border-radius: ${theme.borderRadius.lg}; overflow: hidden; box-shadow: ${theme.shadows.base}; transition: all 0.2s ease; text-decoration: none; color: ${theme.colors.gray[800]}; &:hover { transform: translateY(-4px); box-shadow: ${theme.shadows.lg}; }`;
-const ReviewImageWrapper = styled.div`position: relative; width: 100%; height: 200px; overflow: hidden;`;
-const ReviewImage = styled.img`width: 100%; height: 100%; object-fit: cover;`;
-const VerifiedBadge = styled.div`position: absolute; top: ${theme.spacing.sm}; left: ${theme.spacing.sm}; background-color: ${theme.colors.success}; color: ${theme.colors.white}; padding: ${theme.spacing.xs} ${theme.spacing.sm}; border-radius: ${theme.borderRadius.full}; font-size: ${theme.typography.fontSize.xs}; font-weight: bold;`;
-const TrustScoreBadge = styled.div<{ color: string }>`position: absolute; top: ${theme.spacing.sm}; right: ${theme.spacing.sm}; background-color: ${props => props.color}; color: ${theme.colors.white}; padding: ${theme.spacing.xs} ${theme.spacing.sm}; border-radius: ${theme.borderRadius.full}; font-size: ${theme.typography.fontSize.xs}; font-weight: bold;`;
-const ReviewContent = styled.div`padding: ${theme.spacing.lg};`;
-const ProductInfo = styled.div`display: flex; justify-content: space-between; align-items: center; margin-bottom: ${theme.spacing.sm};`;
-const CategoryTag = styled.span`font-size: ${theme.typography.fontSize.xs}; color: ${theme.colors.primary}; background-color: ${theme.colors.purple[100]}; padding: 2px 8px; border-radius: 4px;`;
-const ProductBrand = styled.div`font-size: ${theme.typography.fontSize.sm}; color: ${theme.colors.gray[500]};`;
-const ProductName = styled.div`font-size: ${theme.typography.fontSize.base}; font-weight: bold; margin-bottom: 4px;`;
-const ReviewTitle = styled.h3`font-size: ${theme.typography.fontSize.lg}; font-weight: bold; margin-bottom: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;`;
-const RatingRow = styled.div`display: flex; align-items: center; gap: 8px; margin-bottom: 12px;`;
-const Stars = styled.div`color: ${theme.colors.warning};`;
-const RatingText = styled.span`font-weight: bold;`;
-const ReviewMeta = styled.div`display: flex; gap: 12px; font-size: ${theme.typography.fontSize.xs}; color: ${theme.colors.gray[600]};`;
-const MetaItem = styled.div`display: flex; align-items: center; gap: 4px;`;
-const MetaIcon = styled.span``;
-const MetaText = styled.span``;
+
 const LoadingMessage = styled.div`text-align: center; padding: 40px; color: ${theme.colors.gray[600]};`;
 const EmptyMessage = styled.div`text-align: center; padding: 40px;`;
 const EmptyIcon = styled.div`font-size: 48px; margin-bottom: 16px;`;
 const EmptyText = styled.p`color: ${theme.colors.gray[600]}; margin-bottom: 16px;`;
+
+// Product List Styles
+const ProductList = styled.div`display: flex; flex-direction: column; gap: 24px;`;
+const ProductCardWrapper = styled.div`
+  background: ${theme.colors.white}; border-radius: 12px; box-shadow: ${theme.shadows.base}; overflow: hidden;
+  transition: box-shadow 0.2s;
+  &:hover { box-shadow: ${theme.shadows.lg}; }
+`;
+const ProductHeader = styled.div`
+  display: flex; padding: 20px; gap: 24px; cursor: pointer; align-items: center;
+  @media (max-width: 768px) { flex-direction: column; align-items: flex-start; gap: 16px; }
+`;
+const ProductImage = styled.img`
+  width: 120px; height: 120px; object-fit: cover; border-radius: 8px; border: 1px solid ${theme.colors.gray[200]};
+  @media (max-width: 768px) { width: 100%; height: 200px; }
+`;
+const ProductInfoMain = styled.div`flex: 1;`;
+const ProductBrand = styled.div`font-size: 14px; color: ${theme.colors.gray[500]}; margin-bottom: 4px;`;
+const ProductTitle = styled.h3`font-size: 20px; font-weight: bold; margin-bottom: 12px; color: ${theme.colors.gray[900]};`;
+const ProductStats = styled.div`display: flex; align-items: center; gap: 16px; flex-wrap: wrap;`;
+const StatItem = styled.div`display: flex; align-items: center; gap: 6px;`;
+const StatLabel = styled.span`font-size: 13px; color: ${theme.colors.gray[500]};`;
+const StatValue = styled.span`font-weight: bold; color: ${theme.colors.gray[800]};`;
+const StatDivider = styled.div`width: 1px; height: 12px; background: ${theme.colors.gray[300]};`;
+const Stars = styled.div`color: ${theme.colors.warning}; font-size: 18px;`;
+const TrustScoreText = styled.span<{ color: string }>`font-weight: bold; color: ${props => props.color};`;
+
+const ExpandButton = styled.button<{ isExpanded: boolean }>`
+  padding: 8px 16px; border-radius: 20px; border: 1px solid ${theme.colors.primary};
+  background: ${props => props.isExpanded ? theme.colors.primary : 'transparent'};
+  color: ${props => props.isExpanded ? 'white' : theme.colors.primary};
+  font-weight: 600; cursor: pointer; transition: all 0.2s;
+  &:hover { background: ${theme.colors.primary}; color: white; }
+`;
+
+// Expanded Review List Styles
+const ReviewListContainer = styled.div`
+  background: ${theme.colors.background.secondary}; padding: 24px; border-top: 1px solid ${theme.colors.gray[200]};
+`;
+const ReviewListHeader = styled.div`margin-bottom: 16px; font-weight: bold; color: ${theme.colors.gray[700]};`;
+const ReviewListTitle = styled.h4`font-size: 16px;`;
+
+const ReviewGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+  justify-content: center;
+`;
+const ReviewCard = styled(Link)`
+  background: white; border-radius: 8px; padding: 16px; text-decoration: none; color: inherit;
+  box-shadow: ${theme.shadows.sm}; display: flex; flex-direction: column; height: 100%;
+  transition: transform 0.2s;
+  &:hover { transform: translateY(-3px); }
+`;
+const ReviewCardHeader = styled.div`display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;`;
+const ReviewUser = styled.div`display: flex; align-items: center; gap: 6px; font-size: 13px; color: ${theme.colors.gray[600]};`;
+const UserIcon = styled.span``;
+const UserName = styled.span`font-weight: 500;`;
+const TrustBadgeSmall = styled.div<{ color: string }>`
+  background: ${props => props.color}; color: white; font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: bold;
+`;
+const ReviewCardContent = styled.div`flex: 1; margin-bottom: 12px;`;
+const ReviewTitle = styled.div`font-weight: bold; margin-bottom: 6px; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;`;
+const RatingRowSmall = styled.div`display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 8px; color: ${theme.colors.gray[500]};`;
+const StarsSmall = styled.span`color: ${theme.colors.warning}; font-weight: bold;`;
+const DateText = styled.span``;
+const ReviewSnippet = styled.p`
+  font-size: 13px; color: ${theme.colors.gray[600]}; line-height: 1.5; 
+  overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+`;
+
+// Pagination Styles
+const PaginationContainer = styled.div`display: flex; justify-content: center; gap: 8px; margin-top: 40px;`;
+const PageButton = styled.button<{ active?: boolean }>`
+  width: 36px; height: 36px; border-radius: 8px; border: 1px solid ${props => props.active ? theme.colors.primary : theme.colors.gray[300]};
+  background: ${props => props.active ? theme.colors.primary : 'white'};
+  color: ${props => props.active ? 'white' : theme.colors.gray[700]};
+  font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+  &:hover:not(:disabled) { border-color: ${theme.colors.primary}; color: ${props => props.active ? 'white' : theme.colors.primary}; }
+`;

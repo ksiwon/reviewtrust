@@ -35,7 +35,8 @@ export const apiClient = {
         results = results.filter(r => 
           r.title.toLowerCase().includes(keyword) || 
           r.productName.toLowerCase().includes(keyword) ||
-          r.content.toLowerCase().includes(keyword)
+          r.content.toLowerCase().includes(keyword) ||
+          r.tags?.some(tag => tag.toLowerCase().includes(keyword))
         );
       }
       if (params?.verifiedOnly) results = results.filter(r => r.verifiedPurchase);
