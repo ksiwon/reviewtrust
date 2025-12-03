@@ -1,10 +1,12 @@
+
 // src/pages/Reviews.tsx
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { Review, FilterOptions, PaginationInfo } from '../types';
+import { Review, FilterOptions, PaginationInfo, AdDetectionResult } from '../types';
 import { categories } from '../data/mockData';
 import { reviewService } from '../api/reviewService';
+import { adDetectionService } from '../services/adDetectionService';
 import { theme, Container, Section, SectionTitle, Input, Button } from '../styles/GlobalStyle';
 
 interface ProductGroup {
@@ -234,7 +236,27 @@ const Reviews: React.FC = () => {
 const ProductGroupItem: React.FC<{ group: ProductGroup }> = ({ group }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [adResults, setAdResults] = useState<Record<string, AdDetectionResult>>({});
+  const [loadingAds, setLoadingAds] = useState<Record<string, boolean>>({});
   const ITEMS_PER_PAGE = 12;
+
+  const handleCheckAd = async (e: React.MouseEvent, review: Review) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (adResults[review._id] || loadingAds[review._id]) return;
+
+    setLoadingAds(prev => ({ ...prev, [review._id]: true }));
+    try {
+      const result = await adDetectionService.checkAdLikelihood(review);
+      setAdResults(prev => ({ ...prev, [review._id]: result }));
+    } catch (error) {
+      console.error('Failed to check ad likelihood', error);
+      alert('광고 분석에 실패했습니다.');
+    } finally {
+      setLoadingAds(prev => ({ ...prev, [review._id]: false }));
+    }
+  };
 
   // Reset pagination when group changes (e.g. filtering)
   useEffect(() => {
@@ -316,6 +338,29 @@ const ProductGroupItem: React.FC<{ group: ProductGroup }> = ({ group }) => {
                     <DateText>{new Date(review.created_at).toLocaleDateString()}</DateText>
                   </RatingRowSmall>
                   <ReviewSnippet>{review.content.substring(0, 100)}...</ReviewSnippet>
+                  
+                  <AdDetectionSection>
+                    {!adResults[review._id] ? (
+                      <AdCheckButton 
+                        onClick={(e) => handleCheckAd(e, review)}
+                        disabled={loadingAds[review._id]}
+                      >
+                        {loadingAds[review._id] ? '분석 중...' : '🕵️ 광고 분석'}
+                      </AdCheckButton>
+                    ) : (
+                      <AdResultBadge isAd={adResults[review._id].isAdLike}>
+                        {adResults[review._id].isAdLike ? '🚫 광고 의심' : '✅ 클린 리뷰'}
+                        <AdScore>({adResults[review._id].adScore}점)</AdScore>
+                        {adResults[review._id].isAdLike && adResults[review._id].reasons.length > 0 && (
+                          <AdReasons>
+                            {adResults[review._id].reasons.map((reason, idx) => (
+                              <AdReason key={idx}>• {reason}</AdReason>
+                            ))}
+                          </AdReasons>
+                        )}
+                      </AdResultBadge>
+                    )}
+                  </AdDetectionSection>
                 </ReviewCardContent>
               </ReviewCard>
             ))}
@@ -459,4 +504,57 @@ const PageButton = styled.button<{ active?: boolean }>`
   font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;
   &:disabled { opacity: 0.5; cursor: not-allowed; }
   &:hover:not(:disabled) { border-color: ${theme.colors.primary}; color: ${props => props.active ? 'white' : theme.colors.primary}; }
+`;
+
+const AdDetectionSection = styled.div`
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed ${theme.colors.gray[200]};
+`;
+
+const AdCheckButton = styled.button`
+  background: ${theme.colors.gray[100]};
+  border: 1px solid ${theme.colors.gray[300]};
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  &:hover {
+    background: ${theme.colors.gray[200]};
+  }
+  &:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+`;
+
+const AdResultBadge = styled.div<{ isAd: boolean }>`
+  font-size: 12px;
+  font-weight: bold;
+  color: ${props => props.isAd ? theme.colors.danger : theme.colors.success};
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+
+const AdScore = styled.span`
+  font-weight: normal;
+  color: ${theme.colors.gray[600]};
+  font-size: 11px;
+`;
+
+const AdReasons = styled.div`
+  margin-top: 4px;
+  font-size: 11px;
+  color: ${theme.colors.gray[700]};
+  background: ${theme.colors.gray[50]};
+  padding: 4px;
+  border-radius: 4px;
+`;
+
+const AdReason = styled.div`
+  margin-bottom: 2px;
 `;
